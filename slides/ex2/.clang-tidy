@@ -1,0 +1,33 @@
+---
+Checks: >
+  - readability-identifier-naming,
+  - readability-braces-around-statements,
+  - readability-misleading-indentation,
+  - readability-avoid-const-params-in-decls,
+  - readability-const-return-type,
+  - readability-uppercase-literal-suffix,
+  - readability-function-cognitive-complexity,
+  - readability-named-parameter,
+  - readability-redundant-control-flow,
+  - readability-redundant-declaration,
+  - readability-redundant-smartptr-get,
+  - readability-simplify-boolean-expr
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+FormatStyle: file
+
+# Naming conventions for variables, structs, and enums
+ReadabilityIdentifierNaming:
+  TypedefCase: lower_case_underscore_t
+  StructCase: lower_case_underscore_t
+  EnumCase: lower_case_underscore_t
+  EnumConstantCase: UPPER_CASE
+  VariableCase: lowerCamelCase
+  FunctionCase: UpperCamelCase
+  MethodCase: UpperCamelCase
+  ConstexprVariableCase: UPPER_CASE
+  MemberCase: lowerCamelCase
+  ParameterCase: lowerCamelCase
+
+---
