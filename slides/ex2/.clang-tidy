@@ -16,18 +16,4 @@ Checks: >
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 FormatStyle: file
-
-# Naming conventions for variables, structs, and enums
-ReadabilityIdentifierNaming:
-  TypedefCase: lower_case_underscore_t
-  StructCase: lower_case_underscore_t
-  EnumCase: lower_case_underscore_t
-  EnumConstantCase: UPPER_CASE
-  VariableCase: lowerCamelCase
-  FunctionCase: UpperCamelCase
-  MethodCase: UpperCamelCase
-  ConstexprVariableCase: UPPER_CASE
-  MemberCase: lowerCamelCase
-  ParameterCase: lowerCamelCase
-
 ---

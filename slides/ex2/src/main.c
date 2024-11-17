@@ -41,7 +41,7 @@ int main( void ) {
             "\n"
             ">>> " );
         fgets( buffer, BUFSIZ, stdin );
-        if ( !sscanf( buffer, "%d", &choice ) ) {
+        if ( !sscanf_s( buffer, "%d", &choice ) ) {
             printf( "Não foi possivel intrepretar a entrada, por favor tente novamente\n" );
             continue;
         }
@@ -71,6 +71,7 @@ int main( void ) {
         }
     }
 
+    destroy_string_array( &array );
     return EXIT_SUCCESS;
 }
 
