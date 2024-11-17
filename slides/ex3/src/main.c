@@ -74,6 +74,8 @@ int main( void ) {
                 printf( "O command \"%d\" não existe, entre um commando valido por favor" );
                 break;
         }
+
+        printf( "\n\n" );
     }
 
     destroy_agenda( &agenda );
@@ -217,8 +219,8 @@ void print_contact( void* args, AgendaEntry_t* entry ) {
     char age_str[4];
     itoa( entry->age, age_str, 10 );
     if ( args ) {
-        size_t i = *( (size_t*) ( args ) );
-        printf( "\t[%lu]: |%-10s|%3s|%c %.4s-%.4s|\n", i, (const char*) entry->name, age_str, entry->cellphone[0], entry->cellphone + 1, entry->cellphone + 5 );
+        size_t* i = (size_t*) ( args );
+        printf( "\t[%lu]: |%-10s|%3s|%c %.4s-%.4s|\n", ( *i )++, (const char*) entry->name, age_str, entry->cellphone[0], entry->cellphone + 1, entry->cellphone + 5 );
     } else {
         printf( "\t|%-10s|%3s|%c %.4s-%.4s|\n", (const char*) entry->name, age_str, entry->cellphone[0], entry->cellphone + 1, entry->cellphone + 5 );
     }

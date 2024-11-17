@@ -49,8 +49,10 @@ void agenda_rmv( Agenda_t* agenda, const char* name ) {
     if ( !found )
         return;
 
-    for ( ; i < agenda->used; i++ )
-        agenda->buffer[i] = agenda->buffer[i + sizeof( AgendaEntry_t )];
+    if ( i != agenda->used) {
+        for ( ; i < agenda->used; i++ )
+            agenda->buffer[i - sizeof(AgendaEntry_t)] = agenda->buffer[i];
+    }
 
     agenda->used -= sizeof( AgendaEntry_t );
 }
