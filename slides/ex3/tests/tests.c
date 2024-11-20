@@ -12,11 +12,9 @@
 Agenda_t* ag;
 
 void setUp( void ) {
-    ag = create_agenda( 20 );
 }
 
 void tearDown( void ) {
-    destroy_agenda( &ag );
 }
 
 struct CompareArgs_t {

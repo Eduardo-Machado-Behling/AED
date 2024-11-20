@@ -7,6 +7,7 @@
 #include "agenda.h"
 
 #define ARRAY_INITIAL_SIZE 64
+#define CELLPHONE_LEN 9
 #define EXIT_FAILURE_IF_MSG( expr, ... ) \
     if ( expr ) {                        \
         fprintf( stderr, __VA_ARGS__ );  \
@@ -23,15 +24,22 @@ enum MENU_CMD {
     MCMD_COUNT,
 };
 
+struct AgendaEntry_t {
+    char name[10];
+    uint8_t age;
+    uint32_t cellphone;
+};
+
 void menu_cmd_add( Agenda_t* agenda, char* buffer, size_t buffer_size );
 void menu_cmd_rmv( Agenda_t* agenda, char* buffer, size_t buffer_size );
 void menu_cmd_search( Agenda_t* agenda, char* buffer, size_t buffer_size );
 void menu_cmd_list( Agenda_t* agenda );
 
-void print_contact( void* args, AgendaEntry_t* name );
+void print_contact( void* args, void* elem );
+bool compare_by_name( void* args, void* elem );
 
 int main( void ) {
-    Agenda_t* agenda = create_agenda( ARRAY_INITIAL_SIZE );
+    Agenda_t* agenda = create_agenda( ARRAY_INITIAL_SIZE, sizeof( struct AgendaEntry_t ) );
     EXIT_FAILURE_IF_MSG( !agenda, "[ERROR]: Não foi allocar memoria para o array" );
 
     bool running = true;
@@ -83,7 +91,7 @@ int main( void ) {
 }
 
 void menu_cmd_add( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
-    AgendaEntry_t entry;
+    struct AgendaEntry_t entry;
     do {
         fputs( "Entre o nome do contato: ", stdout );
         fgets( buffer, buffer_size, stdin );
@@ -132,29 +140,29 @@ void menu_cmd_add( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
             buffer[len] = '\0';
         }
 
-        if ( len != sizeof( ( (AgendaEntry_t*) NULL )->cellphone ) ) {
+        if ( len != CELLPHONE_LEN ) {
             printf( "[ERRO]: O numero informado não obedece o padrão, 9xxxxxxxx, tente novamente.\n" );
             continue;
         }
 
         // a goto would be so good right now :P
         bool error = false;
-        for ( size_t i = 0; i < sizeof( ( (AgendaEntry_t*) NULL )->cellphone ); i++ ) {
+        for ( size_t i = 0; i < CELLPHONE_LEN; i++ ) {
             if ( !isdigit( buffer[i] ) ) {
                 error = true;
                 break;
             }
-            entry.cellphone[i] = buffer[i];
         }
         if ( error ) {
             printf( "[ERRO]: Foi fornecido valores não numericos, tente novamente.\n" );
             continue;
         }
 
+        entry.cellphone = atoll( buffer );
         break;
     }
 
-    agenda_add( agenda, entry );
+    agenda_add( agenda, &entry );
 }
 
 void menu_cmd_rmv( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
@@ -168,7 +176,7 @@ void menu_cmd_rmv( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
             } else if ( !isalpha( buffer[i] ) )
                 continue;
 
-            if ( j >= sizeof( ( (AgendaEntry_t*) NULL )->name ) )
+            if ( j >= sizeof( ( (struct AgendaEntry_t*) NULL )->name ) )
                 break;
 
             buffer[j++] = tolower( buffer[i] );
@@ -177,7 +185,7 @@ void menu_cmd_rmv( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
         buffer[0] = toupper( buffer[0] );
     } while ( !isgraph( buffer[0] ) );
 
-    agenda_rmv( agenda, buffer );
+    agenda_rmv( agenda, compare_by_name, buffer );
 }
 
 void menu_cmd_search( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
@@ -191,7 +199,7 @@ void menu_cmd_search( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
             } else if ( !isalpha( buffer[i] ) )
                 continue;
 
-            if ( j >= sizeof( ( (AgendaEntry_t*) NULL )->name ) )
+            if ( j >= sizeof( ( (struct AgendaEntry_t*) NULL )->name ) )
                 break;
 
             buffer[j++] = tolower( buffer[i] );
@@ -200,7 +208,7 @@ void menu_cmd_search( Agenda_t* agenda, char* buffer, size_t buffer_size ) {
         buffer[0] = toupper( buffer[0] );
     } while ( !isgraph( buffer[0] ) );
 
-    AgendaEntry_t* entry = agenda_search( agenda, buffer );
+    struct AgendaEntry_t* entry = agenda_search( agenda, compare_by_name, buffer );
 
     if ( !entry ) {
         printf( "O contato \"%s\", não foi encontrado.\n", buffer );
@@ -215,13 +223,22 @@ void menu_cmd_list( Agenda_t* agenda ) {
     agenda_for_each( agenda, print_contact, &i );
 }
 
-void print_contact( void* args, AgendaEntry_t* entry ) {
-    char age_str[4];
-    itoa( entry->age, age_str, 10 );
+void print_contact( void* args, void* elem ) {
+    struct AgendaEntry_t* entry = elem;
+    char strbuff[32];
+    itoa( entry->age, strbuff, 10 );
+    itoa( entry->cellphone, strbuff + 4, 10 );
     if ( args ) {
         size_t* i = (size_t*) ( args );
-        printf( "\t[%lu]: |%-10s|%3s|%c %.4s-%.4s|\n", ( *i )++, (const char*) entry->name, age_str, entry->cellphone[0], entry->cellphone + 1, entry->cellphone + 5 );
+        printf( "\t[%lu]: |%-10s|%3s|%c %.4s-%.4s|\n", ( *i )++, (const char*) entry->name, strbuff, strbuff[4], strbuff + 5, strbuff + 9 );
     } else {
-        printf( "\t|%-10s|%3s|%c %.4s-%.4s|\n", (const char*) entry->name, age_str, entry->cellphone[0], entry->cellphone + 1, entry->cellphone + 5 );
+        printf( "\t|%-10s|%3s|%c %.4s-%.4s|\n", (const char*) entry->name, strbuff, strbuff[4], strbuff + 5, strbuff + 9 );
     }
+}
+
+bool compare_by_name( void* args, void* elem ) {
+    const char* name            = args;
+    struct AgendaEntry_t* entry = elem;
+
+    return strncmp( name, entry->name, sizeof( entry->name ) ) == 0;
 }
