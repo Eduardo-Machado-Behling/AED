@@ -14,5 +14,4 @@ add_test(NAME main COMMAND tests)
 
 target_link_libraries(main PRIVATE solution)
 target_include_directories(main PRIVATE ${unity_SOURCE_DIR}/src)
-message("fuck: ${unity_SOURCE_DIR}/src/unity.c")
 target_sources(main PRIVATE ${unity_SOURCE_DIR}/src/unity.c)
