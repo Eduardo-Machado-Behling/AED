@@ -46,6 +46,7 @@ void test_1( void ) {
     char** m = makeMatrix( board, rows, rows );
 
     TEST_ASSERT_TRUE( isValidSudoku( m, rows, &rows ) );
+    eraseMatrix( m, rows );
 }
 
 void test_2( void ) {
@@ -56,6 +57,7 @@ void test_2( void ) {
     char** m = makeMatrix( board, rows, rows );
 
     TEST_ASSERT_FALSE( isValidSudoku( m, rows, &rows ) );
+    eraseMatrix( m, rows );
 }
 
 void test_3( void ) {
@@ -66,6 +68,7 @@ void test_3( void ) {
     char** m = makeMatrix( board, rows, rows );
 
     TEST_ASSERT_FALSE( isValidSudoku( m, rows, &rows ) );
+    eraseMatrix( m, rows );
 }
 int main( void ) {
     UNITY_BEGIN();
