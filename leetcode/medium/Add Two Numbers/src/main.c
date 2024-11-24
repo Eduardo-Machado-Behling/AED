@@ -23,16 +23,12 @@ struct ListNode* listFromArray( int* arr, int size ) {
     return l;
 }
 
-void eraseList( struct ListNode* l ) {
-    struct ListNode *prev = l, *curr = l->next;
-
-    do {
-        free( prev );
-
-        prev = curr;
-        if ( curr )
-            curr = curr->next;
-    } while ( curr );
+void eraseList( struct ListNode* head ) {
+    while ( head ) {
+        struct ListNode* temp = head;
+        head                  = head->next;
+        free( temp );
+    }
 }
 
 bool equalList( struct ListNode* a, struct ListNode* b ) {

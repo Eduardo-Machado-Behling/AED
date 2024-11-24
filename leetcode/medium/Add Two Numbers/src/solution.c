@@ -7,30 +7,32 @@
 #include <math.h>
 
 struct ListNode* addTwoNumbers( struct ListNode* l1, struct ListNode* l2 ) {
-    struct ListNode* l  = malloc( sizeof( struct ListNode ) );
+    struct ListNode* l = (struct ListNode*) malloc( sizeof( struct ListNode ) );
+
     struct ListNode* it = l;
+    int val             = l1->val + l2->val;
+    it->val             = val % 10;
+    uint8_t carry       = val / 10;
 
-    uint8_t carry = 0;
+    l1 = l1->next;
+    l2 = l2->next;
     while ( l1 || l2 || carry ) {
-        int va = 0;
-        if ( l1 ) {
-            va = l1->val;
+        it->next = (struct ListNode*) malloc( sizeof( struct ListNode ) );
+        it       = it->next;
+
+        int va = l1 ? l1->val : 0;
+        if ( l1 )
             l1 = l1->next;
-        }
-        int vb = 0;
-        if ( l2 ) {
-            vb = l2->val;
+        int vb = l2 ? l2->val : 0;
+        if ( l2 )
             l2 = l2->next;
-        }
 
-        int val = va + vb + carry;
+        val     = va + vb + carry;
         it->val = val % 10;
-        carry   = val > 9;
-
-        it->next = !( l1 || l2 ) && carry == 0 ? NULL : malloc( sizeof( struct ListNode ) );
-        if ( it )
-            it = it->next;
+        carry   = val / 10;
     }
+
+    it->next = NULL;
 
     return l;
 }
