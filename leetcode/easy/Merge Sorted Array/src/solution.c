@@ -6,26 +6,16 @@
 #include <ctype.h>
 #include <math.h>
 
-#define MAX_ARRAY_SIZE 200
-
+// Another solution based on hints from the community
 void merge( int* nums1, int nums1Size, int m, int* nums2, int nums2Size, int n ) {
-    int aux[MAX_ARRAY_SIZE] = { 0 };
+    int* n1 = nums1 + m - 1;
+    int* n2 = nums2 + n - 1;
 
-    size_t i1 = 0;
-    size_t i2 = 0;
-    for ( size_t i = 0; i < nums1Size; i++ ) {
-        if ( i1 < m && i2 < n ) {
-            if ( nums1[i1] < nums2[i2] ) {
-                aux[i] = nums1[i1++];
-            } else {
-                aux[i] = nums2[i2++];
-            }
-        } else if ( i1 < m ) {
-            aux[i] = nums1[i1++];
+    for ( size_t ri = nums1Size; ri > 0 && n2 >= nums2; ri-- ) {
+        if ( n1 >= nums1 && *n1 > *n2 ) {
+            nums1[ri - 1] = *n1--;
         } else {
-            aux[i] = nums2[i2++];
+            nums1[ri - 1] = *n2--;
         }
     }
-
-    memcpy( nums1, aux, nums1Size * sizeof( int ) );
 }
