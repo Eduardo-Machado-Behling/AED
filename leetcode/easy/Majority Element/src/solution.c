@@ -6,24 +6,19 @@
 #include <ctype.h>
 #include <math.h>
 
-int compare( const void* a, const void* b ) {
-    return *(int*) a - *(int*) b;
-}
-
 int majorityElement( int* nums, int numsSize ) {
-    qsort( nums, numsSize, sizeof( int ), compare );
-
-    int target = numsSize / 2;
-    int count  = 1;
-    for ( size_t i = 1; i <= numsSize; i++, count++ ) {
-        if ( numsSize == i || nums[i - 1] != nums[i] ) {
-            if ( count > target ) {
-                return nums[i - 1];
-            } else {
-                count = 1;
-            }
+    int counter = 1;
+    int value   = nums[0];
+    for ( size_t i = 1; i < numsSize; i++ ) {
+        if ( !counter ) {
+            value   = nums[i];
+            counter = 1;
+        } else if ( value != nums[i] ) {
+            counter--;
+        } else {
+            counter++;
         }
     }
 
-    return nums[0];
+    return value;
 }
