@@ -30,13 +30,11 @@ void rotate( int* nums, int numsSize, int k ) {
         size_t j = i;
 
         // time (numsSize / gcd(numsSize, k))
-        while ( true ) {
+        for ( size_t _ = 0; _ < numsSize / range; _++ ) {
             j       = ( j + k ) % numsSize;
             int tt  = temp;
             temp    = nums[j];
             nums[j] = tt;
-            if ( j == i )
-                break;
         }
     }
 }
