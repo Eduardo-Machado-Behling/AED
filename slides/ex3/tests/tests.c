@@ -23,7 +23,7 @@ struct CompareArgs_t {
     size_t i;
 };
 
-void compare( void* args, const char* name ) {
+void Compare( void* args, const char* name ) {
     struct CompareArgs_t* arg = args;
 
     if ( !arg->result )
@@ -33,10 +33,10 @@ void compare( void* args, const char* name ) {
         arg->result = false;
 }
 
-void test_proper_usage( void ) {
+void TestProperUsage( void ) {
 }
 
-void test_tricky_usage( void ) {
+void TestTrickyUsage( void ) {
 }
 
 int main( void ) {

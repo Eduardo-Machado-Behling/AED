@@ -35,17 +35,17 @@ Agenda_t* create_agenda( size_t initial_size, size_t elem_size ) {
 }
 
 void agenda_add( Agenda_t* agenda, void* entry ) {
-    size_t available_size = agenda->size.buffer - AGENDA_GET_USED( agenda ) - sizeof( size_t );
+    size_t availableSize = agenda->size.buffer - AGENDA_GET_USED( agenda ) - sizeof( size_t );
 
-    if ( available_size < agenda->size.element ) {
-        size_t new_size = agenda->size.buffer + MIN( agenda->size.buffer * 2, 255 );
-        void* new_mem   = realloc( agenda->pBuffer, agenda->size.buffer );
+    if ( availableSize < agenda->size.element ) {
+        size_t newSize = agenda->size.buffer + MIN( agenda->size.buffer * 2, 255 );
+        void* newMem   = realloc( agenda->pBuffer, agenda->size.buffer );
 
-        if ( !new_mem )
+        if ( !newMem )
             return;
 
-        agenda->pBuffer     = new_mem;
-        agenda->size.buffer = new_size;
+        agenda->pBuffer     = newMem;
+        agenda->size.buffer = newSize;
     }
 
     memcpy( AGENDA_GET_DATA( agenda ) + AGENDA_GET_USED_BYTES( agenda ), entry, agenda->size.element );

@@ -7,7 +7,7 @@
 #include <math.h>
 
 // time (log(min(a,b)))
-int gcd( int a, int b ) {
+int Gcd( int a, int b ) {
     while ( b != 0 ) {
         int temp = b;
         b        = a % b;
@@ -22,7 +22,7 @@ void rotate( int* nums, int numsSize, int k ) {
         return;
 
     // time (log(min(numsSize, k)))
-    size_t range = gcd( numsSize, k );
+    size_t range = Gcd( numsSize, k );
 
     // time (gcd(numsSize, k))
     for ( size_t i = 0; i < range; i++ ) {

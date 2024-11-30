@@ -9,7 +9,7 @@ void setUp( void ) {
 void tearDown( void ) {
 }
 
-void test_1( void ) {
+void Test1( void ) {
     const char* str      = "babad";
     const char* expected = "bab";
 
@@ -19,7 +19,7 @@ void test_1( void ) {
     free( res );
 }
 
-void test_2( void ) {
+void Test2( void ) {
     const char* str      = "cbbd";
     const char* expected = "bb";
 
@@ -29,7 +29,7 @@ void test_2( void ) {
     free( res );
 }
 
-void test_3( void ) {
+void Test3( void ) {
     const char* str      = "ccc";
     const char* expected = "ccc";
 
@@ -39,7 +39,7 @@ void test_3( void ) {
     free( res );
 }
 
-void test_4( void ) {
+void Test4( void ) {
     const char* str      = "aaaa";
     const char* expected = "aaaa";
 
@@ -49,7 +49,7 @@ void test_4( void ) {
     free( res );
 }
 
-void test_5( void ) {
+void Test5( void ) {
     const char* str      = "a";
     const char* expected = "a";
 
@@ -59,7 +59,7 @@ void test_5( void ) {
     free( res );
 }
 
-void test_6( void ) {
+void Test6( void ) {
     const char* str      = "caaaaa";
     const char* expected = "aaaaa";
 
@@ -69,7 +69,7 @@ void test_6( void ) {
     free( res );
 }
 
-void test_7( void ) {
+void Test7( void ) {
     const char* str      = "bb";
     const char* expected = "bb";
 
@@ -82,13 +82,13 @@ void test_7( void ) {
 int main( void ) {
     UNITY_BEGIN();
 
-    RUN_TEST( test_1 );
-    RUN_TEST( test_2 );
-    RUN_TEST( test_3 );
-    RUN_TEST( test_4 );
-    RUN_TEST( test_5 );
-    RUN_TEST( test_6 );
-    RUN_TEST( test_7 );
+    RUN_TEST( Test1 );
+    RUN_TEST( Test2 );
+    RUN_TEST( Test3 );
+    RUN_TEST( Test4 );
+    RUN_TEST( Test5 );
+    RUN_TEST( Test6 );
+    RUN_TEST( Test7 );
 
     return UNITY_END();
 }

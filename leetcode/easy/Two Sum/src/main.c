@@ -9,7 +9,7 @@ void setUp( void ) {
 void tearDown( void ) {
 }
 
-void test_1( void ) {
+void Test1( void ) {
     int nums[] = { 2,
                    7,
                    11, 15 };
@@ -23,7 +23,7 @@ void test_1( void ) {
     free( ret );
 }
 
-void test_2( void ) {
+void Test2( void ) {
     int nums[] = { 3,
                    2,
                    4 };
@@ -37,7 +37,7 @@ void test_2( void ) {
     free( ret );
 }
 
-void test_3( void ) {
+void Test3( void ) {
     int nums[] = { 3,
                    3 };
     int returnSize;
@@ -53,9 +53,9 @@ void test_3( void ) {
 int main( void ) {
     UNITY_BEGIN();
 
-    RUN_TEST( test_1 );
-    RUN_TEST( test_2 );
-    RUN_TEST( test_3 );
+    RUN_TEST( Test1 );
+    RUN_TEST( Test2 );
+    RUN_TEST( Test3 );
 
     return UNITY_END();
 }

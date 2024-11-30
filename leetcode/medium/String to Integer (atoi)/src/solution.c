@@ -14,7 +14,7 @@ struct idStack {
     size_t used;
 };
 
-bool lesserIntMem( uint8_t* da, uint8_t* db, uint32_t daSize, uint32_t dbSize ) {
+bool LesserIntMem( uint8_t* da, uint8_t* db, uint32_t daSize, uint32_t dbSize ) {
     if ( dbSize < daSize )
         return false;
     else if ( dbSize > daSize )
@@ -61,9 +61,9 @@ int myAtoi( char* s ) {
         ;
     stack.used -= offset;
 
-    uint8_t mem_max[] = { 2, 1, 4, 7, 4, 8, 3, 6, 4, 7 };
+    uint8_t memMax[] = { 2, 1, 4, 7, 4, 8, 3, 6, 4, 7 };
 
-    if ( lesserIntMem( mem_max, stack.data + offset, sizeof( mem_max ) / sizeof( int8_t ), stack.used ) ) {
+    if ( LesserIntMem( memMax, stack.data + offset, sizeof( memMax ) / sizeof( int8_t ), stack.used ) ) {
         if ( *stack.data == NEGATIVE_FLAG )
             return INT32_MIN;
         else

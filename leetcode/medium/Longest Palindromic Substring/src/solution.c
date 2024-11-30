@@ -26,16 +26,16 @@ char* longestPalindrome( char* s ) {
             }
             char* backwards = s + len - 1;
 
-            size_t pal_len = 1 + i;
+            size_t palLen = 1 + i;
             for ( ; backwards >= s && forwards[-1] != '\0'; backwards--, forwards++ ) {
                 if ( *backwards != *forwards ) {
                     break;
                 } else {
-                    pal_len += 2;
+                    palLen += 2;
                 }
             }
-            if ( pal_len > info.len ) {
-                info.len   = pal_len;
+            if ( palLen > info.len ) {
+                info.len   = palLen;
                 info.start = backwards + 1;
             }
         }

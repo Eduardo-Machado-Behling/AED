@@ -1,19 +1,27 @@
----
-Checks: >
-  - readability-identifier-naming,
-  - readability-braces-around-statements,
-  - readability-misleading-indentation,
-  - readability-avoid-const-params-in-decls,
-  - readability-const-return-type,
-  - readability-uppercase-literal-suffix,
-  - readability-function-cognitive-complexity,
-  - readability-named-parameter,
-  - readability-redundant-control-flow,
-  - readability-redundant-declaration,
-  - readability-redundant-smartptr-get,
-  - readability-simplify-boolean-expr
 
-WarningsAsErrors: '*'
-HeaderFilterRegex: '.*'
-FormatStyle: file
----
+Checks: '-*,readability-identifier-naming'
+
+CheckOptions:
+  - key: readability-identifier-naming.EnumCase
+    value: camelBack
+  - key: readability-identifier-naming.EnumSuffix
+    value: _t
+
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+
+  - key: readability-identifier-naming.TypedefCase
+    value: camelBack
+  - key: readability-identifier-naming.TypedefSuffix
+    value: _t
+
+  - key: readability-identifier-naming.StructCase
+    value: camelBack
+  - key: readability-identifier-naming.StructSuffix
+    value: _t
+
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE

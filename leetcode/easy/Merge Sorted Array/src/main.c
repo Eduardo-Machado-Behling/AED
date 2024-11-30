@@ -9,7 +9,7 @@ void setUp( void ) {
 void tearDown( void ) {
 }
 
-void test_1( void ) {
+void Test1( void ) {
     int a[] = { 1, 2, 3, 0, 0, 0 };
     int sa  = sizeof( a ) / sizeof( int );
     int b[] = { 2, 5, 6 };
@@ -24,7 +24,7 @@ void test_1( void ) {
     TEST_ASSERT_EQUAL_INT32_ARRAY( expected, a, sa );
 }
 
-void test_2( void ) {
+void Test2( void ) {
     int a[]        = { 1 };
     int sa         = sizeof( a ) / sizeof( int );
     int b[]        = { 0 };
@@ -38,7 +38,7 @@ void test_2( void ) {
     TEST_ASSERT_EQUAL_INT32_ARRAY( expected, a, sa );
 }
 
-void test_3( void ) {
+void Test3( void ) {
     int a[]        = { 0 };
     int sa         = sizeof( a ) / sizeof( int );
     int b[]        = { 1 };
@@ -52,7 +52,7 @@ void test_3( void ) {
     TEST_ASSERT_EQUAL_INT32_ARRAY( expected, a, sa );
 }
 
-void test_4( void ) {
+void Test4( void ) {
     int a[]        = { 1, 2, 3, 0, 0, 0 };
     int sa         = sizeof( a ) / sizeof( int );
     int b[]        = { 2, 5, 6 };
@@ -69,10 +69,10 @@ void test_4( void ) {
 int main( void ) {
     UNITY_BEGIN();
 
-    RUN_TEST( test_1 );
-    RUN_TEST( test_2 );
-    RUN_TEST( test_3 );
-    RUN_TEST( test_4 );
+    RUN_TEST( Test1 );
+    RUN_TEST( Test2 );
+    RUN_TEST( Test3 );
+    RUN_TEST( Test4 );
 
     return UNITY_END();
 }

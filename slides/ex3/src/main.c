@@ -14,7 +14,7 @@
     return EXIT_FAILURE;                                                       \
   }
 
-enum MENU_CMD {
+enum menuCmd_t {
   MCMD_ADD_CONTACT,
   MCMD_RMV_CONTACT,
   MCMD_SEARCH_CONTACT,
@@ -30,13 +30,13 @@ struct AgendaEntry_t {
   uint32_t cellphone;
 };
 
-void menu_cmd_add(Agenda_t *agenda, char *buffer, size_t buffer_size);
-void menu_cmd_rmv(Agenda_t *agenda, char *buffer, size_t buffer_size);
-void menu_cmd_search(Agenda_t *agenda, char *buffer, size_t buffer_size);
-void menu_cmd_list(Agenda_t *agenda);
+void MenuCmdAdd(Agenda_t *agenda, char *buffer, size_t buffer_size);
+void MenuCmdRmv(Agenda_t *agenda, char *buffer, size_t buffer_size);
+void MenuCmdSearch(Agenda_t *agenda, char *buffer, size_t buffer_size);
+void MenuCmdList(Agenda_t *agenda);
 
-void print_contact(void *args, void *elem);
-bool compare_by_name(void *args, void *elem);
+void PrintContact(void *args, void *elem);
+bool CompareByName(void *args, void *elem);
 
 int main(void) {
   Agenda_t *agenda =
@@ -44,7 +44,7 @@ int main(void) {
   EXIT_FAILURE_IF_MSG(!agenda, "[ERROR]: Não foi allocar memoria para o array");
 
   bool running = true;
-  enum MENU_CMD choice;
+  enum menuCmd_t choice;
   char buffer[BUFSIZ];
   while (running) {
     printf("1) Adicionar Contato\n"
@@ -64,16 +64,16 @@ int main(void) {
 
     switch (choice) {
     case MCMD_ADD_CONTACT:
-      menu_cmd_add(agenda, buffer, BUFSIZ);
+      MenuCmdAdd(agenda, buffer, BUFSIZ);
       break;
     case MCMD_RMV_CONTACT:
-      menu_cmd_rmv(agenda, buffer, BUFSIZ);
+      MenuCmdRmv(agenda, buffer, BUFSIZ);
       break;
     case MCMD_SEARCH_CONTACT:
-      menu_cmd_search(agenda, buffer, BUFSIZ);
+      MenuCmdSearch(agenda, buffer, BUFSIZ);
       break;
     case MCMD_LIST:
-      menu_cmd_list(agenda);
+      MenuCmdList(agenda);
       break;
     case MCMD_EXIT:
       running = false;
@@ -91,7 +91,7 @@ int main(void) {
   return EXIT_SUCCESS;
 }
 
-void menu_cmd_add(Agenda_t *agenda, char *buffer, size_t buffer_size) {
+void MenuCmdAdd(Agenda_t *agenda, char *buffer, size_t buffer_size) {
   struct AgendaEntry_t entry;
   do {
     fputs("Entre o nome do contato: ", stdout);
@@ -172,7 +172,7 @@ void menu_cmd_add(Agenda_t *agenda, char *buffer, size_t buffer_size) {
   agenda_add(agenda, &entry);
 }
 
-void menu_cmd_rmv(Agenda_t *agenda, char *buffer, size_t buffer_size) {
+void MenuCmdRmv(Agenda_t *agenda, char *buffer, size_t buffer_size) {
   do {
     fputs("Entre o nome do contato: ", stdout);
     fgets(buffer, buffer_size, stdin);
@@ -192,10 +192,10 @@ void menu_cmd_rmv(Agenda_t *agenda, char *buffer, size_t buffer_size) {
     buffer[0] = toupper(buffer[0]);
   } while (!isgraph(buffer[0]));
 
-  agenda_rmv(agenda, compare_by_name, buffer);
+  agenda_rmv(agenda, CompareByName, buffer);
 }
 
-void menu_cmd_search(Agenda_t *agenda, char *buffer, size_t buffer_size) {
+void MenuCmdSearch(Agenda_t *agenda, char *buffer, size_t buffer_size) {
   do {
     fputs("Entre o nome do contato: ", stdout);
     fgets(buffer, buffer_size, stdin);
@@ -215,22 +215,22 @@ void menu_cmd_search(Agenda_t *agenda, char *buffer, size_t buffer_size) {
     buffer[0] = toupper(buffer[0]);
   } while (!isgraph(buffer[0]));
 
-  struct AgendaEntry_t *entry = agenda_search(agenda, compare_by_name, buffer);
+  struct AgendaEntry_t *entry = agenda_search(agenda, CompareByName, buffer);
 
   if (!entry) {
     printf("O contato \"%s\", não foi encontrado.\n", buffer);
     return;
   }
 
-  print_contact(NULL, entry);
+  PrintContact(NULL, entry);
 }
 
-void menu_cmd_list(Agenda_t *agenda) {
+void MenuCmdList(Agenda_t *agenda) {
   size_t i = 0;
-  agenda_for_each(agenda, print_contact, &i);
+  agenda_for_each(agenda, PrintContact, &i);
 }
 
-void print_contact(void *args, void *elem) {
+void PrintContact(void *args, void *elem) {
   struct AgendaEntry_t *entry = elem;
   char strbuff[32];
   sprintf(strbuff, "%u", entry->age);
@@ -246,7 +246,7 @@ void print_contact(void *args, void *elem) {
   }
 }
 
-bool compare_by_name(void *args, void *elem) {
+bool CompareByName(void *args, void *elem) {
   const char *name = args;
   struct AgendaEntry_t *entry = elem;
 

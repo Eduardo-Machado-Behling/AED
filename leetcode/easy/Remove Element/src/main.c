@@ -9,7 +9,7 @@ void setUp( void ) {
 void tearDown( void ) {
 }
 
-void test_1( void ) {
+void Test1( void ) {
     int a[] = { 3, 2, 2, 3 };
     int sa  = sizeof( a ) / sizeof( int );
     int val = 3;
@@ -21,7 +21,7 @@ void test_1( void ) {
     TEST_ASSERT_EQUAL_INT32_ARRAY( expected, a, res );
 }
 
-void test_2( void ) {
+void Test2( void ) {
     int a[] = { 0, 1, 2, 2, 3, 0, 4, 2 };
     int sa  = sizeof( a ) / sizeof( int );
     int val = 2;
@@ -33,7 +33,7 @@ void test_2( void ) {
     TEST_ASSERT_EQUAL_INT32_ARRAY( expected, a, res );
 }
 
-void test_3( void ) {
+void Test3( void ) {
     int a[] = { 3, 3 };
     int sa  = sizeof( a ) / sizeof( int );
     int val = 3;
@@ -45,7 +45,7 @@ void test_3( void ) {
     TEST_ASSERT_EQUAL_INT( res, 0 );
 }
 
-void test_4( void ) {
+void Test4( void ) {
     int a[] = { 0, 4, 4, 0, 4, 4, 4, 0, 2 };
     int sa  = sizeof( a ) / sizeof( int );
     int val = 4;
@@ -57,7 +57,7 @@ void test_4( void ) {
     TEST_ASSERT_EQUAL_INT32_ARRAY( expected, a, res );
 }
 
-void test_5( void ) {
+void Test5( void ) {
     int a[] = { 4, 5 };
     int sa  = sizeof( a ) / sizeof( int );
     int val = 5;
@@ -73,11 +73,11 @@ void test_5( void ) {
 int main( void ) {
     UNITY_BEGIN();
 
-    RUN_TEST( test_1 );
-    RUN_TEST( test_2 );
-    RUN_TEST( test_3 );
-    RUN_TEST( test_4 );
-    RUN_TEST( test_5 );
+    RUN_TEST( Test1 );
+    RUN_TEST( Test2 );
+    RUN_TEST( Test3 );
+    RUN_TEST( Test4 );
+    RUN_TEST( Test5 );
 
     return UNITY_END();
 }
