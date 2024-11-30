@@ -1,5 +1,12 @@
-
-Checks: '-*,readability-identifier-naming'
+Checks: 
+  '*,
+  -llvmlibc-restrict-system-libc-headers,
+  -altera-id-dependent-backward-branch,
+  -altera-unroll-loops,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  readability-identifier-naming'
 
 CheckOptions:
   - key: readability-identifier-naming.EnumCase

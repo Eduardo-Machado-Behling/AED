@@ -16,7 +16,7 @@ AlignConsecutiveAssignments: true
 AlignTrailingComments: true
 Cpp11BracedListStyle: false
 ColumnLimit: 0
-SortIncludes: false
+SortIncludes: true
 
 # Braces
 BreakBeforeBraces: Attach

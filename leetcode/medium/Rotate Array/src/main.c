@@ -1,7 +1,6 @@
 #include "unity.h"
 
 #include "solution.h"
-#include <stdlib.h>
 
 void setUp( void ) {
 }

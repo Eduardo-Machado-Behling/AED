@@ -1,36 +1,37 @@
 #include "solution.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
-// time (log(min(a,b)))
-int Gcd( int a, int b ) {
-    while ( b != 0 ) {
-        int temp = b;
-        b        = a % b;
-        a        = temp;
+// time (log(min(numA,numB)))
+int Gcd( int numA, int numB ) {
+    while ( numB != 0 ) {
+        int temp = numB;
+        numB     = numA % numB;
+        numA     = temp;
     }
-    return a;
+    return numA;
 }
 
 // time (log(min(numsSize, k)) + numsSize)
 void rotate( int* nums, int numsSize, int k ) {
-    if ( !k || k == numsSize || numsSize == 1 )
+    if ( !k || k == numsSize || numsSize == 1 ) {
         return;
+    }
 
     // time (log(min(numsSize, k)))
-    size_t range = Gcd( numsSize, k );
+    size_t rangeFoo = Gcd( numsSize, k );
 
     // time (gcd(numsSize, k))
-    for ( size_t i = 0; i < range; i++ ) {
+    for ( size_t i = 0; i < rangeFoo; i++ ) {
         int temp = nums[i];
         size_t j = i;
 
         // time (numsSize / gcd(numsSize, k))
-        for ( size_t _ = 0; _ < numsSize / range; _++ ) {
+        for ( size_t _ = 0; _ < numsSize / rangeFoo; _++ ) {
             j       = ( j + k ) % numsSize;
             int tt  = temp;
             temp    = nums[j];
