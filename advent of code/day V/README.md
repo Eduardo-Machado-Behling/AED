@@ -1,35 +1,93 @@
-# --- Day 3: Mull It Over ---
-"Our computers are having issues, so I have no idea if we have any Chief Historians in stock! You're welcome to check the warehouse, though," says the mildly flustered shopkeeper at the North Pole Toboggan Rental Shop. The Historians head out to take a look.
+# --- Day 5: Print Queue ---
+Satisfied with their search on Ceres, the squadron of scholars suggests subsequently scanning the stationery stacks of sub-basement 17.
 
-The shopkeeper turns to you. "Any chance you can see why our computers are having issues again?"
+The North Pole printing department is busier than ever this close to Christmas, and while The Historians continue their search of this historically significant facility, an Elf operating a very familiar printer beckons you over.
 
-The computer appears to be trying to run a program, but its memory (your puzzle input) is corrupted. All of the instructions have been jumbled up!
+The Elf must recognize you, because they waste no time explaining that the new sleigh launch safety manual updates won't print correctly. Failure to update the safety manuals would be dire indeed, so you offer your services.
 
-It seems like the goal of the program is just to multiply some numbers. It does that with instructions like mul(X,Y), where X and Y are each 1-3 digit numbers. For instance, mul(44,46) multiplies 44 by 46 to get a result of 2024. Similarly, mul(123,4) would multiply 123 by 4.
+Safety protocols clearly indicate that new pages for the safety manuals must be printed in a very specific order. The notation `X`|`Y` means that if both page number `X` and page number `Y` are to be produced as part of an update, page number `X` must be printed at some point before page number `Y`.
 
-However, because the program's memory has been corrupted, there are also many invalid characters that should be ignored, even if they look like part of a mul instruction. Sequences like mul(4*, mul(6,9!, ?(12,34), or mul ( 2 , 4 ) do nothing.
+The Elf has for you both the page ordering rules and the pages to produce in each update (your puzzle input), but can't figure out whether each update has the pages in the right order.
 
-For example, consider the following section of corrupted memory:
+## For example:
+```
+47|53
+97|13
+97|61
+97|47
+75|29
+61|13
+75|53
+29|13
+97|29
+53|29
+61|53
+97|53
+61|29
+47|13
+75|47
+97|75
+47|61
+75|61
+47|29
+75|13
+53|13
 
-```xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))```
-Only the four highlighted sections are real mul instructions. Adding up the result of each instruction produces 161 (2*4 + 5*5 + 11*8 + 8*5).
+75,47,61,53,29
+97,61,53,29,13
+75,29,13
+75,97,47,61,53
+61,13,29
+97,13,75,29,47
+```
 
-Scan the corrupted memory for uncorrupted mul instructions. What do you get if you add up all of the results of the multiplications?
+The first section specifies the page ordering rules, one per line. The first rule, `47|53`, means that if an update includes both page number ``47`` and page number `53`, then page number `47` must be printed at some point before page number `53`. (`47` doesn't necessarily need to be immediately before `53`; other pages are allowed to be between them.)
 
-# --- Part Two ---
-As you scan through the corrupted memory, you notice that some of the conditional statements are also still intact. If you handle some of the uncorrupted conditional statements in the program, you might be able to get an even more accurate result.
+The second section specifies the page numbers of each update. Because most safety manuals are different, the pages needed in the updates are different too. The first update, `75`,`47`,`61`,`53`,`29`, means that the update consists of page numbers `75`, `47`, `61`, `53`, and `29`.
 
-There are two new instructions you'll need to handle:
+To get the printers going as soon as possible, start by identifying which updates are already in the right order.
 
-The do() instruction enables future mul instructions.
-The don't() instruction disables future mul instructions.
-Only the most recent do() or don't() instruction applies. At the beginning of the program, mul instructions are enabled.
+In the above example, the first update (`75`,`47`,`61`,`53`,`29`) is in the right order:
 
-For example:
+`75` is correctly first because there are rules that put each other page after it: `75`|`47`, `75`|`61`, `75`|`53`, and `75`|`29`.
+`47` is correctly second because `75` must be before it (`75`|`47`) and every other page must be after it according to `47`|`61`, `47`|`53`, and `47`|`29`.
+`61` is correctly in the middle because `75` and `47` are before it (`75`|`61` and `47`|`61`) and `53` and `29` are after it (`61`|`53` and `61`|`29`).
+`53` is correctly fourth because it is before page number `29` (`53`|`29`).
+`29` is the only page left and so is correctly last.
+Because the first update does not include some page numbers, the ordering rules involving those missing page numbers are ignored.
 
-```xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))```
-This corrupted memory is similar to the example from before, **but this time the mul(5,5) and mul(11,8) instructions are disabled** because there is a don't() instruction before them. The other mul instructions function normally, including the one at the end that gets re-enabled by a do() instruction.
+The second and third updates are also in the correct order according to the rules. Like the first update, they also do not include every page number, and so only some of the ordering rules apply - within each update, the ordering rules that involve missing page numbers are not used.
 
-This time, the sum of the results is 48 (2*4 + 8*5).
+The fourth update, `75`,`97`,`47`,`61`,`53`, is not in the correct order: it would print `75` before `97`, which violates the rule `97`|`75`.
 
-Handle the new instructions; what do you get if you add up all of the results of just the enabled multiplications?
+The fifth update, `61`,`13`,`29`, is also not in the correct order, since it breaks the rule `29`|`13`.
+
+The last update, `97`,`13`,`75`,`29`,`47`, is not in the correct order due to breaking several rules.
+
+For some reason, the Elves also need to know the middle page number of each update being printed. Because you are currently only printing the correctly-ordered updates, you will need to find the middle page number of each correctly-ordered update. In the above example, the correctly-ordered updates are:
+
+```
+75,47,61,53,29
+97,61,53,29,13
+75,29,13
+```
+These have middle page numbers of `61`, `53`, and `29` respectively. Adding these page numbers together gives `143`.
+
+Of course, you'll need to be careful: the actual list of page ordering rules is bigger and more complicated than the above example.
+
+Determine which updates are already in the correct order. What do you get if you add up the middle page number from those correctly-ordered updates?
+
+## --- Part Two ---
+While the Elves get to work printing the correctly-ordered updates, you have a little time to fix the rest of them.
+
+For each of the incorrectly-ordered updates, use the page ordering rules to put the page numbers in the right order. For the above example, here are the three incorrectly-ordered updates and their correct orderings:
+
+| Original  | Updated|
+| :-: | :-: |
+|75,97,47,61,53 | **97**,**75**,47,61,53.|
+|61,13,29 | 61,**29**,**13**.|
+|97,13,75,29,47 | 97,**75**,**47**,29,**13**.|
+
+After taking only the incorrectly-ordered updates and ordering them correctly, their middle page numbers are `47`, `29`, and `47`. Adding these together produces `123`.
+
+Find the updates which are not in the correct order. What do you get if you add up the middle page numbers after correctly ordering just those updates?
