@@ -8,16 +8,20 @@
  * Note: Both returned array and *columnSizes array must be malloced, assume
  * caller calls free().
  */
-int **generate(int numRows, int *returnSize, int **returnColumnSizes) {
-  int *columnsSize = (int *)malloc(numRows * sizeof(int));
-  int **res = (int **)malloc(numRows * sizeof(int *));
 
+int **generate(int numRows, int *returnSize, int **returnColumnSizes) {
   // For early return cases
   *returnColumnSizes = NULL;
   *returnSize = 0;
 
-  // Failed to allocate memory
-  if (!res || !columnsSize) {
+  int *columnsSize = (int *)malloc(numRows * sizeof(int));
+  if (!columnsSize) {
+    return NULL;
+  }
+
+  int **res = (int **)malloc(numRows * sizeof(int *));
+  if (!res) {
+    free(columnsSize);
     return NULL;
   }
 
@@ -25,6 +29,12 @@ int **generate(int numRows, int *returnSize, int **returnColumnSizes) {
     columnsSize[i] = i + 1;
     res[i] = malloc(sizeof(int) * columnsSize[i]);
     if (!res[i]) {
+      // free already allocated memory
+      for (int j = 0; j < i; j++) {
+        free(res[j]);
+      }
+      free((void *)res);
+      free(columnsSize);
       return NULL;
     }
 
