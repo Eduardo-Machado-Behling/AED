@@ -6,4 +6,4 @@
  * Note: Both returned array and *columnSizes array must be malloced, assume
  * caller calls free().
  */
-int **generate(int numRows, int *returnSize, int **returnColumnSizes);
+int** generate( int numRows, int* returnSize, int** returnColumnSizes );
