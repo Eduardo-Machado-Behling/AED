@@ -1,0 +1,34 @@
+Checks: 
+  '*,
+  -llvmlibc-restrict-system-libc-headers,
+  -altera-id-dependent-backward-branch,
+  -altera-unroll-loops,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  readability-identifier-naming'
+
+CheckOptions:
+  - key: readability-identifier-naming.EnumCase
+    value: camelBack
+  - key: readability-identifier-naming.EnumSuffix
+    value: _t
+
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+
+  - key: readability-identifier-naming.TypedefCase
+    value: camelBack
+  - key: readability-identifier-naming.TypedefSuffix
+    value: _t
+
+  - key: readability-identifier-naming.StructCase
+    value: camelBack
+  - key: readability-identifier-naming.StructSuffix
+    value: _t
+
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
