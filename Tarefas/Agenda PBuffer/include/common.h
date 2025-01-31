@@ -8,8 +8,8 @@
   ((TYPE)((uint8_t *)(BUFFER) + (BYTES)))
 #define OFFSET_BY(BUFFER, BYTES) ((void *)((uint8_t *)(BUFFER) + (BYTES)))
 #define GET_OFFSET(A, B)                                                       \
-  (((uint8_t *)MAX(A, (__typeof__(A))B)) -                                     \
-   ((uint8_t *)MIN(A, (__typeof__(A))B)))
+  (((uint8_t *)MAX((uint8_t *)A, (uint8_t *)B)) -                              \
+   ((uint8_t *)MIN((uint8_t *)A, (uint8_t *)B)))
 
 #define RESIZING_FORMULA(AVAILABLE_BYTES, BYTES_TO_ALLOCATE, GROWTH_RATE)      \
   ((((BYTES_TO_ALLOCATE) - (AVAILABLE_BYTES)) / (GROWTH_RATE) + 1) *           \

@@ -9,7 +9,7 @@
 #define ARENA_DATA_INITIAL_SIZE 200U
 #define ARENA_DATA_GROWTH_AMOUNT 200U
 
-#define ARENA_HEADER_SIZE 20U
+#define ARENA_HEADER_SIZE 16U
 
 #define ARENA_INVALID_ACCESSOR (arenaAccessor_t *)UINT32_MAX
 
@@ -17,11 +17,10 @@
  * Arena Layout:
  * Offset (B) |     Type    | Content                 | Reason            |
  *      0     | uint32_t    | Multi Purpose Arg       |  Function Args    |
- *      4     | uint32_t    | Buffer Used (B)         |  Accessers        |
- *      8     | uint32_t    | Buffer Capacity (B)     |  Accessers        |
- *     12     | uint32_t    | Buffer Used (B)         |  Data             |
- *     16     | uint32_t    | Buffer Capacity (B)     |  Data             |
- *     20     | void*       | Data Array              |  Data storage     |
+ *      4     | uint32_t    | Buffer Capacity (B)     |  Accessers        |
+ *      8     | uint32_t    | Buffer Used (B)         |  Data             |
+ *     12     | uint32_t    | Buffer Capacity (B)     |  Data             |
+ *     16     | void*       | Data Array              |  Data storage     |
  *     ...
  */
 
@@ -40,14 +39,16 @@
 #define ARENA_GET(DATATYPE, BLOCK)                                             \
   ((DATATYPE *)(ArenaGetData(*GetArenaSingleton(), (arenaAccessor_t *)(BLOCK))))
 
-#define ARENA_SET_ID_HELPER(TYPE, VAR, BYTES)                                  \
+#define ARENA_STATIC_INITIALIZER_HELPER(TYPE, VAR, BYTES)                      \
   static TYPE *VAR = ARENA_INVALID_ACCESSOR;                                   \
   if (VAR == ARENA_INVALID_ACCESSOR) {                                         \
     VAR = ARENA_ALLOC(BYTES);                                                  \
   }
 
-#define ARENA_SIH(TYPE, VAR) ARENA_SET_ID_HELPER(TYPE, VAR, sizeof(TYPE))
-#define ARENA_SIHB(TYPE, VAR, BYTES) ARENA_SET_ID_HELPER(TYPE, VAR, BYTES)
+#define ARENA_SIH(TYPE, VAR)                                                   \
+  ARENA_STATIC_INITIALIZER_HELPER(TYPE, VAR, sizeof(TYPE))
+#define ARENA_SIHB(TYPE, VAR, BYTES)                                           \
+  ARENA_STATIC_INITIALIZER_HELPER(TYPE, VAR, BYTES)
 
 typedef void arenaAccessor_t;
 

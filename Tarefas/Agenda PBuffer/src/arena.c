@@ -13,7 +13,8 @@
 #define ARENA_INVALID_DATA_OFFSET UINT32_MAX
 
 #define ARENA_GET_OVERALL_USED(ARENA)                                          \
-  (*ArenaGetAccessUsed(ARENA) + *ArenaGetDataUsed(ARENA) + ARENA_HEADER_SIZE)
+  (*ArenaGetAccessCapacity(ARENA) + *ArenaGetDataUsed(ARENA) +                 \
+   ARENA_HEADER_SIZE)
 
 #define ARENA_GET_OVERALL_CAPACITY(ARENA)                                      \
   (*ArenaGetAccessCapacity(ARENA) + *ArenaGetDataCapacity(ARENA) +             \
@@ -27,7 +28,6 @@
 void dumpArena(void *arena, const char *name);
 #endif
 
-inline static uint32_t *ArenaGetAccessUsed(void *arena);
 inline static uint32_t *ArenaGetAccessCapacity(void *arena);
 inline static uint32_t *ArenaGetDataUsed(void *arena);
 inline static uint32_t *ArenaGetDataCapacity(void *arena);
@@ -50,6 +50,7 @@ inline static void MoveMemBlock(void *a, void *aEnd);
 static void *ArenaPushAccesser(void **arena);
 static void ArenaPushData(void **arena);
 
+static uint32_t *ArenaFindAvailableAccessor(void *arena);
 static void ArenaUpdateAccessors(void *arena, uint32_t *accessor,
                                  uint32_t *size);
 
@@ -60,6 +61,7 @@ static void *gArenaInstace = NULL;
 
 void *CreateArena(void) {
   void *arena = malloc(ARENA_INITIAL_SIZE);
+  memset(arena, 0xFF, ARENA_INITIAL_SIZE);
 
   if (!arena) {
     return NULL;
@@ -67,7 +69,6 @@ void *CreateArena(void) {
 
   *ArenaGetDataUsed(arena) = 0;
   *ArenaGetDataCapacity(arena) = ARENA_DATA_INITIAL_SIZE;
-  *ArenaGetAccessUsed(arena) = 0;
   *ArenaGetAccessCapacity(arena) = ARENA_ACCESSORS_INITIAL_SIZE;
   *ArenaGetArg(arena) = 0U;
 
@@ -125,7 +126,6 @@ void ArenaFree(void *arena, arenaAccessor_t *block) {
   }
 
   *accessor = ARENA_AVAILABLE_ACCESSOR_VALUE;
-  *ArenaGetAccessUsed(arena) -= sizeof(uint32_t);
   *ArenaGetDataUsed(arena) -= sizeof(uint32_t) + *deletedSize;
 }
 
@@ -141,9 +141,16 @@ arenaAccessor_t *ArenaRealloc(void **arena, arenaAccessor_t *block) {
                RESIZING_FORMULA(ARENA_GET_AVAILABLE_MEMORY_DATA(*arena),
                                 (*newSize - *size), ARENA_DATA_GROWTH_AMOUNT));
     if (!newBlock) {
-      *ArenaGetArg(*arena) = ARENA_INVALID_DATA_OFFSET;
       return NULL;
     }
+
+#ifdef __DEBUG
+    // To see if indded memory is unitialized.
+    memset(newBlock, 0x00,
+           ARENA_GET_OVERALL_CAPACITY(*arena) +
+               RESIZING_FORMULA(ARENA_GET_AVAILABLE_MEMORY_DATA(*arena),
+                                (*newSize - *size), ARENA_DATA_GROWTH_AMOUNT));
+#endif
 
     // Copy the Header, Accessors and Data from oldBlock until block
     memcpy(newBlock, *arena,
@@ -212,20 +219,28 @@ static void DestroyArena(void **arena) {
   }
 }
 
+static uint32_t *ArenaFindAvailableAccessor(void *arena) {
+  for (uint32_t *i = ArenaGetAccessorsSegment(arena);
+       i != (uint32_t *)ArenaGetDataSegment(arena); i++) {
+
+    if (*i == ARENA_AVAILABLE_ACCESSOR_VALUE) {
+      return i;
+    }
+  }
+
+  return NULL;
+}
+
 static void *ArenaPushAccesser(void **arena) {
   uint32_t *offsetToData = ArenaGetArg(*arena);
   if (*offsetToData == ARENA_INVALID_DATA_OFFSET) {
     return NULL;
   }
 
-  // Try to find a Accessor Available
-  for (uint32_t *i = ArenaGetAccessorsSegment(*arena);
-       i != (uint32_t *)ArenaGetDataSegment(*arena); i++) {
-
-    if (*i == ARENA_AVAILABLE_ACCESSOR_VALUE) {
-      *i = *offsetToData;
-      return (arenaAccessor_t *)GET_OFFSET(i, *arena);
-    }
+  uint32_t *availableAccessor = ArenaFindAvailableAccessor(*arena);
+  if (availableAccessor) {
+    *availableAccessor = *offsetToData;
+    return (arenaAccessor_t *)GET_OFFSET(availableAccessor, *arena);
   }
 
   // Couldn't find a Accessor Available, allocate more accessor
@@ -273,6 +288,13 @@ static void ArenaPushData(void **arena) {
       return;
     }
 
+    memset(newBlock, 0xFF,
+           ARENA_GET_OVERALL_CAPACITY(*arena) +
+               RESIZING_FORMULA(*ArenaGetDataCapacity(*arena) -
+                                    *ArenaGetDataUsed(*arena),
+                                *amountBytesToAllocate + sizeof(uint32_t),
+                                ARENA_DATA_GROWTH_AMOUNT));
+
     // Copy the Header, Accessors and Data from oldBlock
     memcpy(newBlock, *arena,
            ARENA_HEADER_SIZE + *ArenaGetAccessCapacity(*arena) +
@@ -306,17 +328,14 @@ static void ArenaUpdateAccessors(void *arena, uint32_t *accessor,
   }
 }
 
-inline static uint32_t *ArenaGetAccessUsed(void *arena) {
+inline static uint32_t *ArenaGetAccessCapacity(void *arena) {
   return OFFSET_BY(arena, 4U);
 }
-inline static uint32_t *ArenaGetAccessCapacity(void *arena) {
+inline static uint32_t *ArenaGetDataUsed(void *arena) {
   return OFFSET_BY(arena, 8U);
 }
-inline static uint32_t *ArenaGetDataUsed(void *arena) {
-  return OFFSET_BY(arena, 12U);
-}
 inline static uint32_t *ArenaGetDataCapacity(void *arena) {
-  return OFFSET_BY(arena, 16U);
+  return OFFSET_BY(arena, 12U);
 }
 
 inline static uint32_t *ArenaGetAccessorsSegment(void *arena) {

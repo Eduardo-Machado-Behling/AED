@@ -1,5 +1,6 @@
 #include "agenda.h"
 #include "arena.h"
+#include "validators.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -18,37 +19,38 @@ void GetString(char *buffer) {
   }
 }
 
+char *GetName(char *msg, char *buffer) {
+  char *error = NULL;
+  do {
+    fputs(msg, stdout);
+    GetString(buffer);
+    error = IsInvalidName(buffer);
+    if (error)
+      puts(error);
+  } while (error);
+
+  FormatName(buffer);
+  return buffer;
+}
+
+char *GetEmail(char *msg, char *buffer) {
+  char *error = NULL;
+  do {
+    fputs(msg, stdout);
+    GetString(buffer);
+    error = IsInvalidEMail(buffer);
+    if (error)
+      puts(error);
+  } while (error);
+  return buffer;
+}
+
 void AddCommand(void *agenda, char *buffer);
 void RmvCommand(void *agenda, char *buffer);
 void SearchCommand(void *agenda, char *buffer);
 void ListCommand(void *agenda);
 
 void PrintEntry(void *entry);
-
-/*
-int main(void) {
-  void *a = ARENA_ALLOC(8);
-  void *b = ARENA_ALLOC(8);
-  void *c = ARENA_ALLOC(8);
-  void *d = ARENA_ALLOC(8);
-
-  *ARENA_GET(uint64_t, a) = 16UL;
-  *ARENA_GET(uint64_t, b) = 24UL;
-  *ARENA_GET(uint64_t, c) = 32UL;
-  *ARENA_GET(uint64_t, d) = 64UL;
-
-  b = ARENA_REALLOC(b, 64);
-  ARENA_GET(uint64_t, b)[0] = 9UL;
-  ARENA_GET(uint64_t, b)[1] = 18UL;
-  ARENA_GET(uint64_t, b)[2] = 108UL;
-  ARENA_GET(uint64_t, b)[3] = 108UL;
-
-  ARENA_FREE(b);
-  ARENA_FREE(a);
-  ARENA_FREE(d);
-  ARENA_FREE(c);
-}
-*/
 
 int main(void) {
   void *agenda = CreateAgenda();
@@ -72,7 +74,7 @@ int main(void) {
            "5- Sair	\n\n");
     do {
       fputs(">>> ", stdout);
-	  GetString(ARENA_GETI(buffer));
+      GetString(ARENA_GETI(buffer));
     } while (sscanf(ARENA_GETI(buffer), "%d", ARENA_GETI(choice)) == 0);
 
     switch (*ARENA_GETI(choice)) {
@@ -107,31 +109,34 @@ void AddCommand(void *agenda, char *name) {
   ARENA_SIH(uint8_t, age);
   ARENA_SIH(int, ageTemp);
 
-  fputs("name: ", stdout);
-  GetString(ARENA_GETI(name));
+  GetName("name: ", ARENA_GETI(name));
 
   do {
-	  fputs("age: ", stdout);
-	  GetString(ARENA_GETI(email));
+    fputs("age: ", stdout);
+    GetString(ARENA_GETI(email));
   } while (sscanf(ARENA_GETI(email), "%d", ARENA_GETI(ageTemp)) == 0);
 
   *ARENA_GETI(age) = (uint8_t)(*ARENA_GETI(ageTemp));
-  fputs("email: ", stdout);
-  GetString(ARENA_GETI(email));
+  GetEmail("email: ", ARENA_GETI(email));
 
   AgendaAdd(agenda, name, age, email);
 }
 
 void RmvCommand(void *agenda, char *buffer) {
-  fputs("name: ", stdout);
-  GetString(ARENA_GETI(buffer));
+  GetName("name: ", ARENA_GETI(buffer));
 
-  AGENDA_REMOVE(agenda, buffer);
+  void *ret = AGENDA_REMOVE(agenda, buffer);
+
+  if (ret) {
+    printf("\"%s\" foi removido com successo!\n", ARENA_GETI(buffer));
+  } else {
+    printf("\"%s\" não foi encontrado, logo não foi removido!\n",
+           ARENA_GETI(buffer));
+  }
 }
 
 void SearchCommand(void *agenda, char *buffer) {
-  fputs("name: ", stdout);
-  GetString(ARENA_GETI(buffer));
+  GetName("name: ", ARENA_GETI(buffer));
 
   void *entry = AGENDA_SEARCH(agenda, buffer);
   if (entry) {

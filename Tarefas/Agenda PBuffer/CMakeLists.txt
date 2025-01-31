@@ -12,4 +12,6 @@ set(AGENDA_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${AGENDA_INSTALL_BIN_DIR})
 include_directories(${AGENDA_INSTALL_INCLUDE_DIR})
 
+option(SANITIZER "Ativate -fsanitizer=address" OFF)
+
 add_subdirectory(src)

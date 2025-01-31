@@ -26,7 +26,7 @@ void *CreateAgenda(void);
 uint32_t *AgendaGetIndexArg(void *agenda);
 const char **AgendaGetSearchArg(void *agenda);
 
-// Need to use "AgendaSetGetArg" to specify index,
+// Need to use "AgendaGetIndexArg" to specify index,
 // returns NULL on invalid index.
 void *AgendaGetEntry(void *agenda);
 
@@ -36,7 +36,7 @@ void *AgendaSearch(void *agenda);
 
 void AgendaAdd(void *agenda, const char *name, uint8_t *age, const char *email);
 
-void AgendaRemove(void *agenda);
+void *AgendaRemove(void *agenda);
 
 void DestroyAgenda(void **agenda);
 

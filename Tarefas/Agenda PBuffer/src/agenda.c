@@ -139,7 +139,7 @@ copy_failed:
 }
 
 // TODO(yadard): Crazy
-void AgendaRemove(void *agenda) {
+void *AgendaRemove(void *agenda) {
   ARENA_SIH(uint32_t, i);
   ARENA_SIH(uint32_t, elemAmount);
 
@@ -181,9 +181,11 @@ void AgendaRemove(void *agenda) {
           *index -= *DArrayGetElemSize(*AgendaGetData(agenda));
         }
       }
-      break;
+      return (void *)1;
     }
   }
+
+  return NULL;
 }
 
 void DestroyAgenda(void **agenda) {
