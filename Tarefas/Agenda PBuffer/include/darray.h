@@ -18,36 +18,36 @@
  *     ...
  */
 
-#define DARRAY_ELEMENT_AMOUNT(DARRAY, DATATYPE)                                \
-  ((*DArraySize(DARRAY) - DARRAY_HEADER_SIZE) / sizeof(DATATYPE))
-#define DARRAY_AT(DARRAY, INDEX, DATATYPE)                                     \
-  ((DATATYPE *)(*DArrayGetArg(DARRAY) =                                        \
-                    ((INDEX) * sizeof(DATATYPE)) + DARRAY_HEADER_SIZE,         \
-                DArrayAt(DARRAY)))
+#define DARRAY_ELEMENT_AMOUNT( DARRAY, DATATYPE ) \
+    ( ( *DArraySize( DARRAY ) - DARRAY_HEADER_SIZE ) / sizeof( DATATYPE ) )
+#define DARRAY_AT( DARRAY, INDEX, DATATYPE )                                     \
+    ( (DATATYPE*) ( *DArrayGetArg( DARRAY ) =                                    \
+                        ( ( INDEX ) * sizeof( DATATYPE ) ) + DARRAY_HEADER_SIZE, \
+                    DArrayAt( DARRAY ) ) )
 
-#define DARRAY_REMOVE(DARRAY, INDEX, DATATYPE)                                 \
-  (*DArrayGetArg(DARRAY) = ((INDEX) * sizeof(DATATYPE)) + DARRAY_HEADER_SIZE,  \
-   *DArrayGetElemSize(DARRAY) = sizeof(DATATYPE), DArrayRemove(DARRAY))
+#define DARRAY_REMOVE( DARRAY, INDEX, DATATYPE )                                              \
+    ( *DArrayGetArg( DARRAY )      = ( ( INDEX ) * sizeof( DATATYPE ) ) + DARRAY_HEADER_SIZE, \
+      *DArrayGetElemSize( DARRAY ) = sizeof( DATATYPE ), DArrayRemove( DARRAY ) )
 
-#define DARRAY_PUSH(DARRAY, DATATYPE)                                          \
-  (*DArrayGetArg(DARRAY) = sizeof(DATATYPE), DArrayPush(DARRAY))
+#define DARRAY_PUSH( DARRAY, DATATYPE ) \
+    ( *DArrayGetArg( DARRAY ) = sizeof( DATATYPE ), DArrayPush( DARRAY ) )
 
-#define DARRAY_POP(DARRAY, DATATYPE)                                           \
-  (*DArrayGetArg(DARRAY) = sizeof(DATATYPE), DArrayPop(DARRAY))
+#define DARRAY_POP( DARRAY, DATATYPE ) \
+    ( *DArrayGetArg( DARRAY ) = sizeof( DATATYPE ), DArrayPop( DARRAY ) )
 
-void *CreateDArray(void);
+void CreateDArray( void** darray );
 
-uint32_t *DArrayGetArg(void *darray);
-uint32_t *DArrayGetElemSize(void *darray);
+uint32_t* DArrayGetArg( void* darray );
+uint32_t* DArrayGetElemSize( void* darray );
 
-uint32_t const *DArraySize(void *darray);
-uint32_t const *DArrayCapacity(void *darray);
+uint32_t const* DArraySize( void* darray );
+uint32_t const* DArrayCapacity( void* darray );
 
-void *DArrayPush(void *darray);
-void *DArrayAt(void *darray);
-void DArrayRemove(void *darray);
-void DArrayPop(void *darray);
+void* DArrayPush( void* darray );
+void* DArrayAt( void* darray );
+void DArrayRemove( void* darray );
+void DArrayPop( void* darray );
 
-void DestroyDArray(void **darray);
+void DestroyDArray( void** darray );
 
 #endif
