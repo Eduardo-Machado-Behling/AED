@@ -18,36 +18,46 @@
  *     ...
  */
 
-#define DARRAY_ELEMENT_AMOUNT(DARRAY, DATATYPE)                                \
-  ((*DArraySize(DARRAY) - DARRAY_HEADER_SIZE) / sizeof(DATATYPE))
-#define DARRAY_AT(DARRAY, INDEX, DATATYPE)                                     \
-  ((DATATYPE *)(*DArrayGetArg(DARRAY) =                                        \
-                    ((INDEX) * sizeof(DATATYPE)) + DARRAY_HEADER_SIZE,         \
-                DArrayAt(DARRAY)))
+#define DARRAY_ELEMENT_AMOUNT( DARRAY, DATATYPE ) \
+    ( ( *DArraySize( DARRAY ) - DARRAY_HEADER_SIZE ) / sizeof( DATATYPE ) )
 
-#define DARRAY_REMOVE(DARRAY, INDEX, DATATYPE)                                 \
-  (*DArrayGetArg(DARRAY) = ((INDEX) * sizeof(DATATYPE)) + DARRAY_HEADER_SIZE,  \
-   *DArrayGetElemSize(DARRAY) = sizeof(DATATYPE), DArrayRemove(DARRAY))
+#define DARRAY_ATB( DARRAY, OFFSET )                             \
+    ( *DArrayGetArg( DARRAY ) = ( OFFSET ) + DARRAY_HEADER_SIZE, \
+      DArrayAt( DARRAY ) )
 
-#define DARRAY_PUSH(DARRAY, DATATYPE)                                          \
-  (*DArrayGetArg(DARRAY) = sizeof(DATATYPE), DArrayPush(DARRAY))
+#define DARRAY_AT( DARRAY, INDEX, DATATYPE ) \
+    ( (DATATYPE*) ( DARRAY_ATB( DARRAY, ( INDEX ) * sizeof( DATATYPE ) ) ) )
 
-#define DARRAY_POP(DARRAY, DATATYPE)                                           \
-  (*DArrayGetArg(DARRAY) = sizeof(DATATYPE), DArrayPop(DARRAY))
+#define DARRAY_REMOVEB( DARRAY, OFFSET, BYTES )                       \
+    ( *DArrayGetArg( DARRAY )      = ( OFFSET ) + DARRAY_HEADER_SIZE, \
+      *DArrayGetElemSize( DARRAY ) = BYTES, DArrayRemove( DARRAY ) )
 
-void *CreateDArray(void);
+#define DARRAY_REMOVE( DARRAY, INDEX, DATATYPE ) \
+    DARRAY_REMOVEB( DARRAY, INDEX * sizeof( DATATYPE ), sizeof( DATATYPE ) )
 
-uint32_t *DArrayGetArg(void *darray);
-uint32_t *DArrayGetElemSize(void *darray);
+#define DARRAY_PUSHB( DARRAY, BYTES ) \
+    ( *DArrayGetArg( DARRAY ) = BYTES, DArrayPush( DARRAY ) )
+#define DARRAY_PUSH( DARRAY, DATATYPE ) \
+    DARRAY_PUSHB( DARRAY, sizeof( DATATYPE ) )
 
-uint32_t const *DArraySize(void *darray);
-uint32_t const *DArrayCapacity(void *darray);
+#define DARRAY_POPB( DARRAY, BYTES ) \
+    ( *DArrayGetArg( DARRAY ) = BYTES, DArrayPop( DARRAY ) )
+#define DARRAY_POP( DARRAY, DATATYPE ) \
+    DARRAY_POPB( DARRAY, sizeof( DATATYPE ) )
 
-void *DArrayPush(void *darray);
-void *DArrayAt(void *darray);
-void DArrayRemove(void *darray);
-void DArrayPop(void *darray);
+void* CreateDArray( void );
 
-void DestroyDArray(void **darray);
+uint32_t* DArrayGetArg( void* darray );
+uint32_t* DArrayGetElemSize( void* darray );
+
+uint32_t const* DArraySize( void* darray );
+uint32_t const* DArrayCapacity( void* darray );
+
+void* DArrayPush( void* darray );
+void* DArrayAt( void* darray );
+void DArrayRemove( void* darray );
+void DArrayPop( void* darray );
+
+void DestroyDArray( void** darray );
 
 #endif

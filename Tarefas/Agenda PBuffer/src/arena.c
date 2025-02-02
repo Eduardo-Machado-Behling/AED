@@ -44,9 +44,9 @@ inline static uint32_t* ArenaGetBlockSizeFromBlock( void* arena,
 inline static void* ArenaGetBlockDataFromSize( uint32_t* size );
 
 inline static void Swap( void* a, void* b );
-inline static void MoveMemBlock( void* a, void* aEnd );
+static void MoveMemBlock( void* a, void* aEnd );
 
-static void* ArenaPushAccesser( void** arena );
+static void* ArenaPushAccessor( void** arena );
 static void ArenaPushData( void** arena );
 
 static uint32_t* ArenaFindAvailableAccessor( void* arena );
@@ -56,8 +56,15 @@ static void ArenaUpdateAccessors( void* arena, uint32_t* accessor,
 static void* CreateArena( void );
 static void DestroyArena( void** arena );
 
-static void* gArenaInstace = NULL;
+static void* gArenaInstance = NULL;
 
+/*
+=================
+CreateArena
+
+Creates a Arena instance.
+=================
+*/
 void* CreateArena( void ) {
     void* arena = malloc( ARENA_INITIAL_SIZE );
     memset( arena, 0x00, ARENA_INITIAL_SIZE );
@@ -77,14 +84,32 @@ void* CreateArena( void ) {
     return arena;
 }
 
+/*
+=================
+DestroyArenaHelper
+
+A helper function to use DestroyArena() on atexit();
+=================
+*/
 static void DestroyArenaHelper( void ) {
-    DestroyArena( &gArenaInstace );
+    DestroyArena( &gArenaInstance );
 }
 
+/*
+=================
+GetArenaSingleton
+
+Returns a shared instance of a Arena,
+in the first call of this function, it creates its instance.
+
+Can return NULL only on first call,
+if failed to create instance OR failed to register DestroyArena() on atexit()
+=================
+*/
 void** GetArenaSingleton( void ) {
-    if ( !gArenaInstace ) {
-        gArenaInstace = CreateArena();
-        if ( !gArenaInstace ) {
+    if ( !gArenaInstance ) {
+        gArenaInstance = CreateArena();
+        if ( !gArenaInstance ) {
             return NULL;
         }
         if ( atexit( DestroyArenaHelper ) ) {
@@ -92,23 +117,66 @@ void** GetArenaSingleton( void ) {
         }
     }
 
-    return &gArenaInstace;
+    return &gArenaInstance;
 }
 
+/*
+=================
+ArenaGetArg
+
+Returns the address for the uint32_t that is used on the following function as a argument:
+- ArenaAlloc/ARENA_ALLOC: Amount of bytes to allocate;
+- ArenaRealloc/ARENA_REALLOC: New size in Bytes for the BLOCK;
+=================
+*/
 uint32_t* ArenaGetArg( void* arena ) {
     return (uint32_t*) arena;
 }
 
+/*
+=================
+ArenaGetData
+
+Returns the actually address of the BLOCK on memory,
+for convenance can use the macros ARENA_GET(DATATYPE, BLOCK) to return a DATATYPE* of the BLOCK,
+or ARENA_GETI(BLOCK) where it returns the a address of the BLOCK as the variable DATATYPE, i.e.
+* OBS: ARENA_GETI can only be used on variables, use ARENA_GET otherwise.
+`
+char* buffer = ARENA_ALLOC(1024);
+
+void* usingArenaGetData = ArenaGetData(*GetArenaSingleton(), buffer);
+char* usingARENA_GET = ARENA_GET(char, buffer);
+char* usingARENA_GETI = ARENA_GETI(buffer);
+`
+=================
+*/
 void* ArenaGetData( void* arena, const arenaAccessor_t* block ) {
     return OFFSET_BY( ArenaGetDataSegment( arena ),
                       *ArenaGetAccessorFromBlock( arena, block ) + sizeof( uint32_t ) );
 }
 
+/*
+=================
+ArenaAlloc
+
+Allocates *(ArenaGetArg()) Bytes and returns the BLOCK's accessor.
+can return ARENA_INVALID_ACCESSOR if a reallocation fails
+=================
+*/
 arenaAccessor_t* ArenaAlloc( void** arena ) {
     ArenaPushData( arena );
-    return ArenaPushAccesser( arena );
+    return ArenaPushAccessor( arena );
 }
 
+/*
+=================
+ArenaFree
+
+Frees a BLOCK, this doesn't call FREE() just marks the BLOCK's memory as available.
+If BLOCK is the last (higher address value) BLOCK just soft delete (cheap).
+Else the proceeding BLOCK are shifted to the left and erase the data (costly).
+=================
+*/
 void ArenaFree( void* arena, arenaAccessor_t* block ) {
     uint32_t* accessor = ArenaGetAccessorFromBlock( arena, block );
     uint32_t* size     = ArenaGetBlockSize( arena, accessor );
@@ -132,6 +200,17 @@ void ArenaFree( void* arena, arenaAccessor_t* block ) {
     *ArenaGetDataUsed( arena ) -= sizeof( uint32_t ) + *deletedSize;
 }
 
+/*
+=================
+ArenaRealloc
+
+Reallocs a BLOCK to be *(ArenaGetArg()) size.
+
+IF BLOCK is the last (rightmost) BLOCK is just increased (cheap),
+ELSE BLOCK is moved to be the last (rightmost) and then is increase (expensive),
+in both cases can cause a Arena resizing, if there isn't enough available memory.
+=================
+*/
 arenaAccessor_t* ArenaRealloc( void** arena, arenaAccessor_t* block ) {
     uint32_t* accessor = ArenaGetAccessorFromBlock( *arena, block );
     uint32_t* size     = ArenaGetBlockSize( *arena, accessor );
@@ -207,6 +286,13 @@ arenaAccessor_t* ArenaRealloc( void** arena, arenaAccessor_t* block ) {
     return block;
 }
 
+/*
+=================
+DestroyArena
+
+Free a Arena instance
+=================
+*/
 static void DestroyArena( void** arena ) {
     if ( !arena ) {
         return;
@@ -219,6 +305,14 @@ static void DestroyArena( void** arena ) {
     }
 }
 
+/*
+=================
+ArenaFindAvailableAccessor
+
+returns the address of a available accessor,
+returns NULL if none are available.
+=================
+*/
 static uint32_t* ArenaFindAvailableAccessor( void* arena ) {
     for ( uint32_t* i = ArenaGetAccessorsSegment( arena );
           i != (uint32_t*) ArenaGetDataSegment( arena ); i++ ) {
@@ -231,10 +325,18 @@ static uint32_t* ArenaFindAvailableAccessor( void* arena ) {
     return NULL;
 }
 
-static void* ArenaPushAccesser( void** arena ) {
+/*
+=================
+ArenaPushAccessor
+
+Finds a accessor to host the Data offset and return its address,
+IF there isn't one available, will resize Arena to create more accessor.
+=================
+*/
+static void* ArenaPushAccessor( void** arena ) {
     uint32_t* offsetToData = ArenaGetArg( *arena );
     if ( *offsetToData == ARENA_INVALID_DATA_OFFSET ) {
-        return NULL;
+        return ARENA_INVALID_ACCESSOR;
     }
 
     uint32_t* availableAccessor = ArenaFindAvailableAccessor( *arena );
@@ -249,7 +351,7 @@ static void* ArenaPushAccesser( void** arena ) {
         RESIZING_FORMULA( 0, sizeof( uint32_t ), ARENA_ACCESSORS_GROWTH_AMOUNT ) );
 
     if ( !newBlock ) {
-        return NULL;
+        return ARENA_INVALID_ACCESSOR;
     }
 
     memset( newBlock, 0x00, ARENA_GET_OVERALL_CAPACITY( *arena ) + RESIZING_FORMULA( 0, sizeof( uint32_t ), ARENA_ACCESSORS_GROWTH_AMOUNT ) );
@@ -320,6 +422,15 @@ static void ArenaPushData( void** arena ) {
     *ArenaGetArg( *arena ) = GET_OFFSET( data, ArenaGetDataSegment( *arena ) );
 }
 
+/*
+=================
+ArenaUpdateAccessors
+
+Update all accessors to account for the shifting of memory in functions like:
+- ArenaFree/ARENA_FREE;
+- ArenaRealloc/ARENA_REALLOC;
+=================
+*/
 static void ArenaUpdateAccessors( void* arena, uint32_t* accessor,
                                   uint32_t* size ) {
     for ( uint32_t* j = ArenaGetAccessorsSegment( arena );
@@ -330,55 +441,152 @@ static void ArenaUpdateAccessors( void* arena, uint32_t* accessor,
     }
 }
 
+/*
+=================
+ArenaGetAccessCapacity
+
+returns the address of the uint32_t that contains the amount of Bytes allocated for accessors.
+=================
+*/
 inline static uint32_t* ArenaGetAccessCapacity( void* arena ) {
     return OFFSET_BY( arena, 4U );
 }
+/*
+=================
+ArenaGetDataUsed
+
+returns the address of the uint32_t that contains the amount of Bytes used on Data.
+=================
+*/
 inline static uint32_t* ArenaGetDataUsed( void* arena ) {
     return OFFSET_BY( arena, 8U );
 }
+
+/*
+=================
+ArenaGetDataCapacity
+
+returns the address of the uint32_t that contains the amount of Bytes allocated for Data.
+=================
+*/
 inline static uint32_t* ArenaGetDataCapacity( void* arena ) {
     return OFFSET_BY( arena, 12U );
 }
 
+/*
+=================
+ArenaGetAccessorsSegment
+
+returns the address of the start of the accessors segment.
+=================
+*/
 inline static uint32_t* ArenaGetAccessorsSegment( void* arena ) {
     return OFFSET_BY( arena, ARENA_HEADER_SIZE );
 }
 
+/*
+=================
+ArenaGetDataSegment
+
+returns the address of the start of the data segment.
+=================
+*/
 inline static void* ArenaGetDataSegment( void* arena ) {
     return OFFSET_BY( arena, *ArenaGetAccessCapacity( arena ) + ARENA_HEADER_SIZE );
 }
 
+/*
+=================
+Swap
+
+Inplace XOR swap algorithm.
+=================
+*/
 inline static void Swap( void* a, void* b ) {
     *(uint8_t*) a ^= *(uint8_t*) b;
     *(uint8_t*) b ^= *(uint8_t*) a;
     *(uint8_t*) a ^= *(uint8_t*) b;
 }
 
-inline static void MoveMemBlock( void* a, void* aEnd ) {
+/*
+=================
+MoveMemBlock
+
+Moves the memory in a to AEnd - 1 to the right, i.e.
+
+in:
+a               aEnd
+v                 v
+1, 2, 3, 4, 5, 6, 7, 8
+
+out:
+7, 1, 2, 3, 4, 5, 6, 8
+=================
+*/
+static void MoveMemBlock( void* a, void* aEnd ) {
     for ( uint8_t* it = aEnd; a != it; it-- ) {
         Swap( it, it - 1 );
     }
 }
+
+/*
+=================
+ArenaGetAccessorFromBlock
+
+helper function to get Accessor from arenaAccessor_t* BLOCK;
+=================
+*/
 inline static uint32_t*
 ArenaGetAccessorFromBlock( void* arena, const arenaAccessor_t* block ) {
     return OFFSET_BY_TYPED( uint32_t*, arena, (uint64_t) block );
 }
 
+/*
+=================
+ArenaGetBlockSize
+
+Helper function that returns the address of the size indicator of the BLOCK
+pointed by the accessor.
+=================
+*/
 inline static uint32_t* ArenaGetBlockSize( void* arena, void* accessor ) {
     return OFFSET_BY_TYPED( uint32_t*, ArenaGetDataSegment( arena ),
                             *(uint32_t*) accessor );
 }
 
+/*
+=================
+ArenaGetBlockSizeFromBlock
+
+Helper function that returns the address of the size indicator of the BLOCK
+=================
+*/
 inline static uint32_t* ArenaGetBlockSizeFromBlock( void* arena,
                                                     arenaAccessor_t* block ) {
     return ArenaGetBlockSize( arena, ArenaGetAccessorFromBlock( arena, block ) );
 }
 
+/*
+=================
+ArenaGetBlockDataFromSize
+
+returns the address of the data using the address of the size indicator.
+=================
+*/
 inline static void* ArenaGetBlockDataFromSize( uint32_t* size ) {
     return OFFSET_BY( size, sizeof( uint32_t ) );
 }
 
 #ifdef __DEBUG
+/*
+=================
+dumpArena
+
+Dump the memory contents on the Arena, is used for DEBUG purposes,
+called from GDB directly, it has a weird issue with fprintf() formats on
+windows and linux
+=================
+*/
 void dumpArena( void* arena, const char* name ) {
     FILE* file = fopen( name, "w" );
     if ( !file ) {
