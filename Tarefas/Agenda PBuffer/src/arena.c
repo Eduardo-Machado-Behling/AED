@@ -587,6 +587,7 @@ called from GDB directly, it has a weird issue with fprintf() formats on
 windows and linux
 =================
 */
+/*
 void dumpArena( void* arena, const char* name ) {
     FILE* file = fopen( name, "w" );
     if ( !file ) {
@@ -616,4 +617,5 @@ void dumpArena( void* arena, const char* name ) {
 
     fclose( file );
 }
+*/
 #endif

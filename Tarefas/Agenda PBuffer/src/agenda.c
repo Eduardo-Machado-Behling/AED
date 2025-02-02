@@ -237,9 +237,8 @@ void* AgendaRemove( void* agenda ) {
         if ( strcmp( entry, ARENA_GET( const char*, *AgendaGetSearchArg( agenda ) ) ) ==
              0 ) {
             if ( *ARENA_GETI( i ) + 1 == *ARENA_GETI( elemAmount ) ) {
-                *DArrayGetArg( *AgendaGetData( agenda ) ) =
-                    *DARRAY_AT( *AgendaGetPrefix( agenda ), *ARENA_GETI( i ), uint32_t ) -
-                    *DARRAY_AT( *AgendaGetPrefix( agenda ), *ARENA_GETI( i ) - 1, uint32_t );
+                *DArrayGetArg( *AgendaGetData( agenda ) ) = *DArraySize( *AgendaGetData( agenda ) ) -
+                                                            *DARRAY_AT( *AgendaGetPrefix( agenda ), *ARENA_GETI( i ), uint32_t );
 
                 DArrayPop( *AgendaGetData( agenda ) );
                 DARRAY_POP( *AgendaGetPrefix( agenda ), uint32_t );

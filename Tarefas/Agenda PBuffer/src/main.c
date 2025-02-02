@@ -190,7 +190,8 @@ void SearchCommand( void* agenda, char* buffer ) {
         PrintEntry( entry );
         fputc( '\n', stdout );
     } else {
-        printf( "Couldn't find the name \"%s\"\n", ARENA_GETI( buffer ) );
+        printf( "\"%s\" não foi encontrado!\n",
+                ARENA_GETI( buffer ) );
     }
 }
 
