@@ -7,66 +7,52 @@
 #define MAX_CLASSES 100000
 
 struct entry {
-  int students;
-  int passed;
-  int reps;
-};
+    int students;
+    int passed;
+    double change;
+} __attribute__( ( aligned( 16 ) ) );
 
-void appendMin(struct entry minStack[MAX_CLASSES], int *used,
-               struct entry entry) {
-  if (*used == MAX_CLASSES) {
-    return;
-  }
-
-  int i = *used - 1;
-  for (; i >= 0 && minStack[i].students < entry.students; i--) {
-    minStack[i + 1] = minStack[i];
-  }
-
-  for (; i >= 0 && minStack[i].students == entry.students &&
-         minStack[i].reps > entry.reps;
-       i--) {
-    minStack[i + 1] = minStack[i];
-  }
-
-  minStack[i + 1] = entry;
-  (*used)++;
-}
-
-double maxAverageRatio(int **classes, int classesSize, int *classesColSize,
-                       int extraStudents) {
-  struct entry minStack[MAX_CLASSES];
-  int used = 0;
-
-  for (int i = 0; i < classesSize; i++) {
-    int reps = classes[i][1] - classes[i][0];
-    appendMin(minStack, &used,
-              (struct entry){.students = classes[i][1],
-                             .passed = classes[i][0],
-                             .reps = reps});
-  }
-
-  int offset = 0;
-  for (int i = 0; i < extraStudents; i++) {
-    int ri = used - offset - 1;
-    struct entry *entry = minStack + ri;
-
-    if (ri > 0) {
-      if (entry->students > entry[-1].students && entry[-1].reps != 0) {
-        offset++;
-        entry--;
-      }
+void appendMin( struct entry minStack[MAX_CLASSES], int* used,
+                struct entry entry ) {
+    int i = ( *used )++ - 1;
+    for ( ; i >= 0 && minStack[i].change > entry.change; i-- ) {
+        minStack[i + 1] = minStack[i];
     }
 
-    ++(entry->students);
-    ++(entry->passed);
-  }
+    minStack[i + 1] = entry;
+}
 
-  double res = 0;
-  for (int i = 0; i < used; i++) {
-    res += (minStack[i].passed) / (double)(minStack[i].students);
-  }
-  res /= used;
+double getNextChange( int passed, int students ) {
+    return ( (double) ( passed + 1 ) / ( students + 1 ) );
+}
 
-  return res;
+double getChange( int passed, int students ) {
+    return ( (double) ( passed + 1 ) / ( students + 1 ) ) - (double) ( passed ) / ( students );
+}
+
+double maxAverageRatio( int** classes, int classesSize, int* classesColSize,
+                        int extraStudents ) {
+    struct entry minStack[MAX_CLASSES] = { 0 };
+
+    int used   = 0;
+    double res = 0;
+
+    for ( int i = 0; i < classesSize; i++ ) {
+        double change = (double) ( classes[i][0] ) / ( classes[i][1] );
+        res += change;
+        appendMin( minStack, &used,
+                   ( struct entry ){ .students = classes[i][1],
+                                     .passed   = classes[i][0],
+                                     .change   = getNextChange( classes[i][0], classes[i][1] ) - change } );
+    }
+
+    struct entry* maxChange = minStack + used - 1;
+    for ( int i = 0; i < extraStudents; i++ ) {
+        res += maxChange->change;
+        maxChange->change = getChange( ++maxChange->passed, ++maxChange->students );
+        --used;
+        appendMin( minStack, &used, *maxChange );
+    }
+
+    return res / used;
 }
