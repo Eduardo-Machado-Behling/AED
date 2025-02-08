@@ -147,6 +147,7 @@ def main(extra: int|None, limit: int|None) -> None:
         limit = 16
 
     print(f"Running with extra={extra}, limit={limit}")
+    os.system("cmake -S . -B build -DBENCHMARK=ON")
     os.system("cmake --build build")
     for i in range(4, limit):
         gen = min(2 ** i, MAX_INPUT_SIZE)
