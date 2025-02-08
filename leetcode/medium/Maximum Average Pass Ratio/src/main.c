@@ -51,21 +51,6 @@ void Test2( void ) {
     TEST_ASSERT_EQUAL_DOUBLE( expected, res );
 }
 
-void Test2( void ) {
-    int classes[][2]        = { { 2, 4 }, { 3, 9 }, { 4, 5 }, { 2, 10 } };
-    const int classesSize   = sizeof( classes ) / sizeof( *classes );
-    const int extraStudents = 4;
-    int classesColSize      = 2;
-    int** matrix            = makeMatrix( classes, classesSize );
-
-    const double expected = 0.53485;
-
-    const double res =
-        maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
-
-    TEST_ASSERT_EQUAL_DOUBLE( expected, res );
-}
-
 int main( void ) {
     UNITY_BEGIN();
 
