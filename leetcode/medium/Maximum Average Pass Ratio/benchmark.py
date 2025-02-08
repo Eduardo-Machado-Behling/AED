@@ -8,7 +8,7 @@ import os
 import json
 import sys
 import matplotlib
-matplotlib.use('TkAgg')  # Or 'Qt5Agg' if you prefer Qt backend
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 from collections import defaultdict
@@ -25,7 +25,8 @@ class Cache:
 
 class Context:
     def __init__(self, date: str, host_name: str, executable: str, num_cpus: int, mhz_per_cpu: int,
-                 cpu_scaling_enabled: bool, caches: List[Cache], load_avg: List[float], library_build_type: str):
+                 cpu_scaling_enabled: bool, caches: List[Cache], load_avg: List[float], library_build_type: str,
+                 library_version: str|None = None, json_schema_version: str|None = None):
         self.date = date
         self.host_name = host_name
         self.executable = executable
@@ -35,6 +36,8 @@ class Context:
         self.caches = caches
         self.load_avg = load_avg
         self.library_build_type = library_build_type
+        self.library_version = library_version
+        self.json_schema_version = json_schema_version
 
 class Benchmark:
     def __init__(self, name: str, family_index: int, per_family_instance_index: int, run_name: str,
@@ -101,14 +104,15 @@ def runWithInput(input: Input) -> BenchmarkData | None:
     executable = os.path.join(BENCHMARK_PATH, executable)
     process = subprocess.Popen([executable, "--benchmark_format=json"], cwd=BENCHMARK_PATH, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     data_raw = process.stdout.read()
+    with open(os.path.join(BENCHMARK_PATH, f"data{len(input.classes)}.json"), 'w') as js:
+        js.write(data_raw)
+
     try:
         benchdata = BenchmarkData.from_json(data_raw)
     except json.JSONDecodeError as e:
         print("Error while decoding output")
         print(e)
-        print("Faulty json will be in faulty.json:")
-        with open("faulty.json", 'w') as js:
-            js.write(data_raw)
+        print("Faulty json will be in ./bin/benchmark/data.json:")
         return None
     return benchdata
 
