@@ -1,18 +1,25 @@
 #include <benchmark/benchmark.h>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 
 int extraStudents;
 int classesSize;
 int classesColSize = 2;
 int** matrix;
+std::vector<std::vector<int>> m;
 
+#include "array_updated.h"
+#include "best_solution.h"
+#include "inplace.h"
 #include "linkedlist.h"
+#include "passed0.h"
+#include "passed1.h"
 extern "C" {
 #include "solution.h"
 }
 
-static void arraySolution( benchmark::State& state ) {
+static void mainSolution( benchmark::State& state ) {
     // Code inside this loop is measured repeatedly
     for ( auto _ : state ) {
         maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
@@ -26,9 +33,48 @@ static void listSolution( benchmark::State& state ) {
         linkedMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
     }
 }
-BENCHMARK( listSolution );
 
-BENCHMARK( arraySolution );
+static void arrayUpdatedSolution( benchmark::State& state ) {
+
+    for ( auto _ : state ) {
+        arrayUpdatedMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+    }
+}
+
+static void inplaceSolution( benchmark::State& state ) {
+
+    for ( auto _ : state ) {
+        inplaceMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+    }
+}
+
+static void passed1Solution( benchmark::State& state ) {
+
+    for ( auto _ : state ) {
+        passed1MaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+    }
+}
+
+static void passed0Solution( benchmark::State& state ) {
+
+    for ( auto _ : state ) {
+        passed0MaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+    }
+}
+
+static void bestCSolution( benchmark::State& state ) {
+    for ( auto _ : state ) {
+        bestMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+    }
+}
+
+BENCHMARK( bestCSolution );
+BENCHMARK( passed0Solution );
+BENCHMARK( passed1Solution );
+BENCHMARK( mainSolution );
+// BENCHMARK( listSolution );
+// BENCHMARK( inplaceSolution );
+// BENCHMARK( arrayUpdatedSolution );
 
 void parseInput() {
     FILE* f = fopen( "input.txt", "r" );

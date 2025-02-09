@@ -13,8 +13,8 @@ struct node {
     struct entry val;
 };
 
-void appendMin( struct node* head,
-                struct entry entry ) {
+static void appendMin( struct node* head,
+                       struct entry entry ) {
     struct node* prev = head;
     struct node* it   = head->next;
 
@@ -28,15 +28,15 @@ void appendMin( struct node* head,
     prev->next->next = it;
 }
 
-double getNextChange( int passed, int students ) {
+static double getNextChange( int passed, int students ) {
     return ( (double) ( passed + 1 ) / ( students + 1 ) );
 }
 
-double getChange( int passed, int students ) {
+static double getChange( int passed, int students ) {
     return ( (double) ( passed + 1 ) / ( students + 1 ) ) - (double) ( passed ) / ( students );
 }
 
-struct node* popHead( struct node* head ) {
+static struct node* popHead( struct node* head ) {
     struct node* ret = head->next;
     head->next       = ret->next;
     return ret;

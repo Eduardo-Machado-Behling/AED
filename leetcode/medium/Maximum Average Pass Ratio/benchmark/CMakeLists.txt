@@ -5,8 +5,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add Google Benchmark
 find_package(benchmark REQUIRED)
 
+file(GLOB SOURCE *.cpp)
 # Add the source file containing your code and benchmarks
-add_executable(bench main.cpp linkedlist.cpp)
+add_executable(bench ${SOURCE})
 set_target_properties(bench PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/benchmark)
 target_link_libraries(bench PRIVATE solution)
 

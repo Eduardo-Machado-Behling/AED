@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from typing import *
 import random
+import shutil
 
 from dataclasses import dataclass
 import subprocess
@@ -10,8 +11,10 @@ import sys
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import numpy as np
 
 from collections import defaultdict
+from BADCASE import *
 
 BENCHMARK_PATH = os.path.join(os.getcwd(), "bin", "benchmark")
 MAX_INPUT_SIZE = 100_000
@@ -95,7 +98,18 @@ def generateInput(amount: int) -> List[int]:
 
     return [genPair() for _ in range(amount)]
 
-def runWithInput(input: Input) -> BenchmarkData | None:
+def cleanFolder(folder: str) -> None:
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+def runWithInput(input: Input, firstTime = []) -> BenchmarkData | None:
     input.generateFile()
     executable = "bench"
     if os.name == 'nt':
@@ -104,8 +118,24 @@ def runWithInput(input: Input) -> BenchmarkData | None:
     executable = os.path.join(BENCHMARK_PATH, executable)
     process = subprocess.Popen([executable, "--benchmark_format=json"], cwd=BENCHMARK_PATH, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     data_raw = process.stdout.read()
-    with open(os.path.join(BENCHMARK_PATH, f"data{len(input.classes)}.json"), 'w') as js:
+
+    output_folder = os.path.join(BENCHMARK_PATH, "outputs")
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+    elif not firstTime:             #hacky way, because quick and dirty
+        cleanFolder(output_folder)
+
+    input_folder = os.path.join(BENCHMARK_PATH, "inputs")
+    if not os.path.exists(input_folder):
+        os.mkdir(input_folder)
+    elif not firstTime:             #TODO: hacky way, because it's to late in the night
+        cleanFolder(input_folder)
+        firstTime.append(1)
+
+    with open(os.path.join(output_folder, f"data{len(input.classes)}.json"), 'w') as js:
         js.write(data_raw)
+    
+    os.rename(os.path.join(BENCHMARK_PATH, "input.txt"), os.path.join(input_folder, f"input{len(input.classes)}.txt"))
 
     try:
         benchdata = BenchmarkData.from_json(data_raw)
@@ -138,19 +168,22 @@ def graph(extras: int, inputsSize: List[int], benchmarks: List[BenchmarkData]) -
 
 
 
-def main(extra: int|None, limit: int|None) -> None:
+def main(extra: int|None, cases: int|None) -> None:
     benchmarks = []
     sizes = []
     if(extra == None):
         extra = random.randint(8, 256)
-    if(limit == None):
-        limit = 16
+    if(cases == None):
+        cases = 16
 
-    print(f"Running with extra={extra}, limit={limit}")
-    os.system("cmake -S . -B build -DBENCHMARK=ON")
+    print(f"Running with extra={extra}, cases={cases}")
+    os.system("cmake -S . -B build -DBENCHMARK=ON -DCMAKE_BUILD_TYPE=Release")
     os.system("cmake --build build")
-    for i in range(4, limit):
-        gen = min(2 ** i, MAX_INPUT_SIZE)
+    for gen in np.ceil(np.linspace(2, MAX_INPUT_SIZE, cases)):
+        gen = int(gen)
+        if gen == MAX_INPUT_SIZE:
+            print("Reached BAD_CASE")
+            break
         inp = Input(f"Random ({extra}/{gen})", extra, generateInput(gen))
         benchdata = runWithInput(inp)
 
@@ -161,11 +194,9 @@ def main(extra: int|None, limit: int|None) -> None:
 
         benchmarks.append(runWithInput(inp))
         sizes.append(gen)
-
-        if gen == MAX_INPUT_SIZE:
-            print("Reached MAX_INPUT_SIZE_CONSTRAINT")
-            break
     
+    benchmarks.append(runWithInput(Input(f"Test case that timeouts my code", BADCASE_EXTRAS, BADCASE_INPUT)))
+    sizes.append(len(BADCASE_INPUT))
     graph(extra, sizes, benchmarks)
 
 
@@ -173,11 +204,11 @@ def main(extra: int|None, limit: int|None) -> None:
 
 if __name__ == '__main__':
     extra = None
-    limit = None
+    cases = None
     if len(sys.argv) > 2:
-        limit = int(sys.argv[2])
+        cases = int(sys.argv[2])
         extra = int(sys.argv[1])
     elif len(sys.argv) > 1:
         extra = int(sys.argv[1])
 
-    main(extra, limit)
+    main(extra, cases)

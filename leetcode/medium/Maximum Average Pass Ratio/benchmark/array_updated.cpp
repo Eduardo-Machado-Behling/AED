@@ -1,8 +1,5 @@
-#include "solution.h"
-
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 #define MAX_CLASSES 100000
 
@@ -12,8 +9,8 @@ struct entry {
     double change;
 } __attribute__( ( aligned( 16 ) ) );
 
-void appendMin( struct entry minStack[MAX_CLASSES], int* used,
-                struct entry entry ) {
+static void appendMin( struct entry minStack[MAX_CLASSES], int* used,
+                       struct entry entry ) {
     int i = ( *used )++ - 1;
     for ( ; i >= 0 && minStack[i].change > entry.change; i-- ) {
         minStack[i + 1] = minStack[i];
@@ -22,16 +19,16 @@ void appendMin( struct entry minStack[MAX_CLASSES], int* used,
     minStack[i + 1] = entry;
 }
 
-double getNextChange( int passed, int students ) {
+static double getNextChange( int passed, int students ) {
     return ( (double) ( passed + 1 ) / ( students + 1 ) );
 }
 
-double getChange( int passed, int students ) {
-    return ( (double) ( passed + 1 ) / ( students + 1 ) ) - (double) ( passed ) / ( students );
+static double getChange( int passed, int students ) {
+    return (double) ( students - passed ) / ( students * ( students + 1.0 ) );
 }
 
-double maxAverageRatio( int** classes, int classesSize, int* classesColSize,
-                        int extraStudents ) {
+double arrayUpdatedMaxAverageRatio( int** classes, int classesSize, int* classesColSize,
+                                    int extraStudents ) {
     struct entry minStack[MAX_CLASSES] = { 0 };
 
     int used   = 0;
