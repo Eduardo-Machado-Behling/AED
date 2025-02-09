@@ -150,7 +150,7 @@ def graph(extras: int, inputsSize: List[int], benchmarks: List[BenchmarkData]) -
     plt.figure(figsize=(8, 5))
 
     data = defaultdict(list)
-    [[data[bench.name].append(bench.real_time * 1_000_000) for bench in benchmark.benchmarks] for benchmark in benchmarks]
+    [[data[bench.name].append(bench.cpu_time * 1_000_000) for bench in benchmark.benchmarks] for benchmark in benchmarks]
 
     for k,v in  data.items():
         plt.plot(inputsSize, v, label=k)
