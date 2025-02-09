@@ -7,6 +7,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(unity)
 
 add_library(solution STATIC solution.c solution.h)
+target_link_libraries(solution PRIVATE m)
 target_include_directories(solution PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(solution PROPERTIES LINKER_LANGUAGE C)
 

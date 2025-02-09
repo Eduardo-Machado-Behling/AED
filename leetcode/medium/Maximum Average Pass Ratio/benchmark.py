@@ -92,8 +92,8 @@ INTMAX = 2**31 - 1
 
 def generateInput(amount: int) -> List[int]:
     def genPair() -> Tuple[int, int]:
-        students = random.randint(0, INTMAX)
-        passed = random.randint(0, students)
+        students = random.randint(np.ceil(INTMAX * 0.25), INTMAX)
+        passed = random.randint(np.floor(students - students*min(0.95, random.random() + 0.5)) , students)
         return passed, students
 
     return [genPair() for _ in range(amount)]

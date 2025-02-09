@@ -12,6 +12,7 @@ double expected;
 
 #include "array_updated.h"
 #include "best_solution.h"
+#include "heap_recursive.h"
 #include "inplace.h"
 #include "linkedlist.h"
 #include "passed0.h"
@@ -96,13 +97,23 @@ static void bestCSolution( benchmark::State& state ) {
     }
 }
 
+static void heapRSolution( benchmark::State& state ) {
+    for ( auto _ : state ) {
+        double res = heapRMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "heapRMaxAverageRatio produced wrong output" );
+        }
+    }
+}
+
 BENCHMARK( bestCSolution );
 BENCHMARK( passed0Solution );
 BENCHMARK( passed1Solution );
 BENCHMARK( mainSolution );
-BENCHMARK( listSolution );
-BENCHMARK( inplaceSolution );
+// BENCHMARK( listSolution );
+// BENCHMARK( inplaceSolution );
 BENCHMARK( arrayUpdatedSolution );
+BENCHMARK( heapRSolution );
 
 void parseInput() {
     FILE* f = fopen( "input.txt", "r" );
