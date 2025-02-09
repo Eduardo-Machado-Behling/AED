@@ -1,4 +1,5 @@
 #include <benchmark/benchmark.h>
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -7,7 +8,7 @@ int extraStudents;
 int classesSize;
 int classesColSize = 2;
 int** matrix;
-std::vector<std::vector<int>> m;
+double expected;
 
 #include "array_updated.h"
 #include "best_solution.h"
@@ -19,10 +20,19 @@ extern "C" {
 #include "solution.h"
 }
 
+const double EPSILON = 1e-6; // Adjust based on required precision
+
+bool almostEquals( double a, double b ) {
+    return std::abs( a - b ) < EPSILON;
+}
+
 static void mainSolution( benchmark::State& state ) {
     // Code inside this loop is measured repeatedly
     for ( auto _ : state ) {
-        maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "maxAverageRatio produced wrong output" );
+        }
     }
 }
 // Register the function as a benchmark
@@ -30,41 +40,59 @@ static void mainSolution( benchmark::State& state ) {
 static void listSolution( benchmark::State& state ) {
 
     for ( auto _ : state ) {
-        linkedMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = linkedMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "linkedMaxAverageRatio produced wrong output" );
+        }
     }
 }
 
 static void arrayUpdatedSolution( benchmark::State& state ) {
 
     for ( auto _ : state ) {
-        arrayUpdatedMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = arrayUpdatedMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "arrayUpdatedMaxAverageRatio produced wrong output" );
+        }
     }
 }
 
 static void inplaceSolution( benchmark::State& state ) {
 
     for ( auto _ : state ) {
-        inplaceMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = inplaceMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "inplaceMaxAverageRatio produced wrong output" );
+        }
     }
 }
 
 static void passed1Solution( benchmark::State& state ) {
 
     for ( auto _ : state ) {
-        passed1MaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = passed1MaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "passed1MaxAverageRatio produced wrong output" );
+        }
     }
 }
 
 static void passed0Solution( benchmark::State& state ) {
 
     for ( auto _ : state ) {
-        passed0MaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = passed0MaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "passed0MaxAverageRatio produced wrong output" );
+        }
     }
 }
 
 static void bestCSolution( benchmark::State& state ) {
     for ( auto _ : state ) {
-        bestMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        double res = bestMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
+        if ( !almostEquals( res, expected ) ) {
+            state.SkipWithError( "bestMaxAverageRatio produced wrong output" );
+        }
     }
 }
 
@@ -72,9 +100,9 @@ BENCHMARK( bestCSolution );
 BENCHMARK( passed0Solution );
 BENCHMARK( passed1Solution );
 BENCHMARK( mainSolution );
-// BENCHMARK( listSolution );
-// BENCHMARK( inplaceSolution );
-// BENCHMARK( arrayUpdatedSolution );
+BENCHMARK( listSolution );
+BENCHMARK( inplaceSolution );
+BENCHMARK( arrayUpdatedSolution );
 
 void parseInput() {
     FILE* f = fopen( "input.txt", "r" );
@@ -121,6 +149,8 @@ void parseInput() {
 int main( int argc, char** argv ) {
     benchmark::Initialize( &argc, argv );
     parseInput();
+    expected =
+        bestMaxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
     benchmark::RunSpecifiedBenchmarks();
     return 0;
 }

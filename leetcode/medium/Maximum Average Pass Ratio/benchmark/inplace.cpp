@@ -30,7 +30,7 @@ double inplaceMaxAverageRatio( int** classes, int classesSize, int* classesColSi
         ratio     = getPotentialRatio( a );
 
         int j = classesSize - 2;
-        for ( ; j >= 0 && ratio < getPotentialRatio( classes[j] ); i-- ) {
+        for ( ; j >= 0 && ratio < getPotentialRatio( classes[j] ); j-- ) {
             classes[j + 1][0] = classes[j][0];
             classes[j + 1][1] = classes[j][1];
         }
