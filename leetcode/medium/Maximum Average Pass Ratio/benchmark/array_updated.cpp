@@ -27,6 +27,7 @@ static double getChange( int passed, int students ) {
     return (double) ( students - passed ) / ( students * ( students + 1.0 ) );
 }
 
+// O(n²)
 double arrayUpdatedMaxAverageRatio( int** classes, int classesSize, int* classesColSize,
                                     int extraStudents ) {
     struct entry minStack[MAX_CLASSES] = { 0 };
@@ -34,9 +35,12 @@ double arrayUpdatedMaxAverageRatio( int** classes, int classesSize, int* classes
     int used   = 0;
     double res = 0;
 
+    // O(n²)
+    // (sum(i = 1, n))
     for ( int i = 0; i < classesSize; i++ ) {
         double change = (double) ( classes[i][0] ) / ( classes[i][1] );
         res += change;
+        // O(i)
         appendMin( minStack, &used,
                    ( struct entry ){ .students = classes[i][1],
                                      .passed   = classes[i][0],
@@ -44,10 +48,13 @@ double arrayUpdatedMaxAverageRatio( int** classes, int classesSize, int* classes
     }
 
     struct entry* maxChange = minStack + used - 1;
+    // O(k * n)
     for ( int i = 0; i < extraStudents; i++ ) {
         res += maxChange->change;
         maxChange->change = getChange( ++maxChange->passed, ++maxChange->students );
         --used;
+
+        // O(n)
         appendMin( minStack, &used, *maxChange );
     }
 

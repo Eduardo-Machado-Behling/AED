@@ -28,8 +28,8 @@ bool almostEquals( double a, double b ) {
 }
 
 static void mainSolution( benchmark::State& state ) {
-    // Code inside this loop is measured repeatedly
     for ( auto _ : state ) {
+        // Code inside this loop is measured repeatedly
         double res = maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
         if ( !almostEquals( res, expected ) ) {
             state.SkipWithError( "maxAverageRatio produced wrong output" );
@@ -110,8 +110,8 @@ BENCHMARK( bestCSolution );
 BENCHMARK( passed0Solution );
 BENCHMARK( passed1Solution );
 BENCHMARK( mainSolution );
-// BENCHMARK( listSolution );
-// BENCHMARK( inplaceSolution );
+BENCHMARK( listSolution );
+BENCHMARK( inplaceSolution );
 BENCHMARK( arrayUpdatedSolution );
 BENCHMARK( heapRSolution );
 

@@ -64,6 +64,7 @@ void swap( struct entry* a, struct entry* b ) {
     *b                = temp;
 }
 
+// log(n)
 void heapify( struct entry heap[MAX_CLASSES], int used, int i ) {
     int largest = i;
     do {
@@ -98,18 +99,25 @@ void heapify( struct entry heap[MAX_CLASSES], int used, int i ) {
 #endif
 }
 
+// n/2(log n)
+// n(log n)
 void heapSort( struct entry heap[MAX_CLASSES], int used ) {
     for ( int i = GET_PARENT( used ); i >= 0; i-- ) {
         heapify( heap, used, i );
     }
 }
 
+// n + n log(n) + k log(n)
+// n(1 + log(n)) + k log(n)
+// n log(n) + k log(n)
+// (n + k)log(n)
 double maxAverageRatio( int** classes, int classesSize, int* classesColSize,
                         int extraStudents ) {
     struct entry heap[MAX_CLASSES] = { 0 };
     int used                       = 0;
     double res                     = 0;
 
+    // n
     for ( int i = 0; i < classesSize; i++ ) {
         double change = (double) ( classes[i][0] ) / ( classes[i][1] );
         res += change;
@@ -119,11 +127,14 @@ double maxAverageRatio( int** classes, int classesSize, int* classesColSize,
 #ifdef __DEBUG
     printf( "SORTING:\n" );
 #endif
+    // n (log n)
     heapSort( heap, used );
 
 #ifdef __DEBUG
     printf( "EXTRAS:\n" );
 #endif
+
+    // k (log n)
     for ( int i = 0; i < extraStudents; i++ ) {
         double max = heap[0].delta;
         res += max;

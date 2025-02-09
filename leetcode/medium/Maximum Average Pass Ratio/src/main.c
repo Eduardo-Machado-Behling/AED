@@ -34,6 +34,10 @@ void Test1( void ) {
         maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
 
     TEST_ASSERT_EQUAL_DOUBLE( expected, res );
+    for ( size_t i = 0; i < classesSize; i++ ) {
+        free( matrix[i] );
+    }
+    free( matrix );
 }
 
 void Test2( void ) {
@@ -49,6 +53,10 @@ void Test2( void ) {
         maxAverageRatio( matrix, classesSize, &classesColSize, extraStudents );
 
     TEST_ASSERT_EQUAL_DOUBLE( expected, res );
+    for ( size_t i = 0; i < classesSize; i++ ) {
+        free( matrix[i] );
+    }
+    free( matrix );
 }
 
 int main( void ) {
