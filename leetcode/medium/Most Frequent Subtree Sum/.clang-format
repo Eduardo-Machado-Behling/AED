@@ -1,0 +1,35 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakBeforeMultilineStrings: false
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: true
+SpaceAfterCStyleCast: true
+SpacesInSquareBrackets: false
+PointerAlignment: Left
+DerivePointerAlignment: false
+AlignConsecutiveAssignments: true
+AlignTrailingComments: true
+Cpp11BracedListStyle: false
+ColumnLimit: 0
+SortIncludes: true
+
+# Braces
+BreakBeforeBraces: Attach
+
+# Case Indentation
+IndentCaseLabels: true
+
+# Access Modifiers
+AccessModifierOffset: -4
+
+# Constructor Initializers
+BreakConstructorInitializers: BeforeComma
+
+# Comment Recognition
+CommentPragmas: '^\\s*====================.*'
+---
