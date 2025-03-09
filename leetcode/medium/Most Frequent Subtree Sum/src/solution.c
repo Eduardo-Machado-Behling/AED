@@ -35,10 +35,12 @@ struct hashmap_t {
     int bucketsAmount;
 };
 
+// O(1)
 int hash( struct hashmap_t* hashmap, int key ) {
     return abs( key % hashmap->bucketsAmount );
 }
 
+// O(1)
 void initDarray( struct darray_t* darray, int initialSize, int elementSize ) {
     darray->size        = initialSize;
     darray->used        = 0;
@@ -47,6 +49,7 @@ void initDarray( struct darray_t* darray, int initialSize, int elementSize ) {
     darray->data = malloc( initialSize * elementSize );
 }
 
+// O(1)
 void appendDarray( struct darray_t* darray, void* val ) {
     if ( darray->used == darray->size ) {
         int newSize   = darray->size * 2;
@@ -62,14 +65,17 @@ void appendDarray( struct darray_t* darray, void* val ) {
     memcpy( darray->data + darray->used++ * darray->elementSize, val, darray->elementSize );
 }
 
+// O(1)
 void* atDarray( struct darray_t* darray, int i ) {
     return darray->data + i * darray->elementSize;
 }
 
+// O(1)
 void clearDarray( struct darray_t* darray ) {
     darray->used = 0;
 }
 
+// O(1)
 void initHashmap( struct hashmap_t* hashmap, int bucketsAmount, int bucketsSize ) {
     hashmap->bucketsAmount = bucketsAmount;
     hashmap->buckets       = malloc( sizeof( *hashmap->buckets ) * bucketsAmount );
@@ -79,6 +85,7 @@ void initHashmap( struct hashmap_t* hashmap, int bucketsAmount, int bucketsSize 
     }
 }
 
+// O(1)
 void freeHashmap( struct hashmap_t* hashmap ) {
     for ( int i = 0; i < hashmap->bucketsAmount; i++ ) {
         free( hashmap->buckets[i].data );
@@ -86,6 +93,7 @@ void freeHashmap( struct hashmap_t* hashmap ) {
     free( hashmap->buckets );
 }
 
+// O(1)
 struct pair_t* getHashmap( struct hashmap_t* hashmap, int key ) {
     int i = hash( hashmap, key );
 
@@ -113,7 +121,6 @@ int sumRecursive( struct TreeNode* root, struct hashmap_t* counter, struct darra
     sum += sumRecursive( root->left, counter, ret, max );
     sum += sumRecursive( root->right, counter, ret, max );
 
-    printf( "sum: %d\n", sum );
     struct pair_t* p = getHashmap( counter, sum );
     p->val++;
     if ( p->val >= *max ) {
@@ -127,17 +134,22 @@ int sumRecursive( struct TreeNode* root, struct hashmap_t* counter, struct darra
     return sum;
 }
 
+// O(n)
 int* findFrequentTreeSum( struct TreeNode* root, int* returnSize ) {
     struct hashmap_t counter;
     struct darray_t ret;
     int max = 1;
 
+    // O(1)
     initDarray( &ret, 10000, sizeof( int ) );
+    // O(1)
     initHashmap( &counter, 20, 1000 );
 
+    // O(n)
     sumRecursive( root, &counter, &ret, &max );
     *returnSize = ret.used;
 
+    // O(1)
     freeHashmap( &counter );
     return (int*) ret.data;
 }
