@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /**
  * Definition for a binary tree node.
@@ -17,90 +18,126 @@
  * Note: The returned array must be malloced, assume caller calls free().
  */
 
+struct pair_t {
+    int key;
+    int val;
+};
+
+struct darray_t {
+    int used;
+    int size;
+    int elementSize;
+    uint8_t* data;
+};
+
+struct hashmap_t {
+    struct darray_t* buckets;
+    int bucketsAmount;
+};
+
+int hash( struct hashmap_t* hashmap, int key ) {
+    return abs( key % hashmap->bucketsAmount );
+}
+
+void initDarray( struct darray_t* darray, int initialSize, int elementSize ) {
+    darray->size        = initialSize;
+    darray->used        = 0;
+    darray->elementSize = elementSize;
+
+    darray->data = malloc( initialSize * elementSize );
+}
+
+void appendDarray( struct darray_t* darray, void* val ) {
+    if ( darray->used == darray->size ) {
+        int newSize   = darray->size * 2;
+        void* newData = realloc( darray->data, newSize * darray->elementSize );
+        if ( !newData ) {
+            return;
+        }
+
+        darray->data = newData;
+        darray->size = newSize;
+    }
+
+    memcpy( darray->data + darray->used++ * darray->elementSize, val, darray->elementSize );
+}
+
+void* atDarray( struct darray_t* darray, int i ) {
+    return darray->data + i * darray->elementSize;
+}
+
+void clearDarray( struct darray_t* darray ) {
+    darray->used = 0;
+}
+
+void initHashmap( struct hashmap_t* hashmap, int bucketsAmount, int bucketsSize ) {
+    hashmap->bucketsAmount = bucketsAmount;
+    hashmap->buckets       = malloc( sizeof( *hashmap->buckets ) * bucketsAmount );
+
+    for ( size_t i = 0; i < bucketsAmount; i++ ) {
+        initDarray( hashmap->buckets + i, bucketsSize, sizeof( struct pair_t ) );
+    }
+}
+
+void freeHashmap( struct hashmap_t* hashmap ) {
+    for ( int i = 0; i < hashmap->bucketsAmount; i++ ) {
+        free( hashmap->buckets[i].data );
+    }
+    free( hashmap->buckets );
+}
+
+struct pair_t* getHashmap( struct hashmap_t* hashmap, int key ) {
+    int i = hash( hashmap, key );
+
+    struct darray_t* bucket = hashmap->buckets + i;
+
+    i = 0;
+    for ( ; i < bucket->used; i++ ) {
+        struct pair_t* p = atDarray( bucket, i );
+        if ( p->key == key ) {
+            return p;
+        }
+    }
+
+    struct pair_t p = { .key = key, .val = 0 };
+    appendDarray( bucket, &p );
+    return atDarray( bucket, i );
+}
+
 // O(na)  | na = nodesAmount
-int sumRecursive( struct TreeNode* root, int** ret, int* size, int* returnSize ) {
+int sumRecursive( struct TreeNode* root, struct hashmap_t* counter, struct darray_t* ret, int* max ) {
     if ( !root )
         return 0;
 
     int sum = root->val;
-    sum += sumRecursive( root->left, ret, size, returnSize );
-    sum += sumRecursive( root->right, ret, size, returnSize );
+    sum += sumRecursive( root->left, counter, ret, max );
+    sum += sumRecursive( root->right, counter, ret, max );
+
     printf( "sum: %d\n", sum );
-    if ( *returnSize == *size ) {
-        printf( "Realloc" );
-        int newSize  = *size * 2;
-        void* newRet = realloc( *ret, sizeof( int ) * newSize );
-        if ( !newRet ) {
-            printf( "Cooked!!\n" );
-            return 0;
+    struct pair_t* p = getHashmap( counter, sum );
+    p->val++;
+    if ( p->val >= *max ) {
+        if ( p->val > *max ) {
+            *max = p->val;
+            clearDarray( ret );
         }
-        *ret  = newRet;
-        *size = newSize;
+        appendDarray( ret, &( p->key ) );
     }
-    ret[0][( *returnSize )++] = sum;
+
     return sum;
 }
 
-struct pair_t {
-    int key;
-    int count;
-};
-
-// O (n²)
-int getMost( int* ret, int returnSize ) {
-    struct pair_t* aux = malloc( sizeof( struct pair_t ) * returnSize );
-    int max            = 1;
-
-    // O(n²)
-    for ( int i = 0; i < returnSize; i++ ) {
-        int found        = 0;
-        struct pair_t* p = NULL;
-
-        // O(i)
-        for ( int j = 0; j < i; j++ ) {
-            if ( aux[j].key == ret[i] ) {
-                aux[j].count++;
-                p     = aux + j;
-                found = 1;
-                break;
-            }
-        }
-        if ( !found ) {
-            aux[i].key   = ret[i];
-            aux[i].count = 1;
-            p            = aux + i;
-        }
-
-        if ( p->count > max ) {
-            max = p->count;
-        }
-    }
-
-    printf( "aux:\n" );
-    for ( int i = 0; i < returnSize; i++ ) {
-        printf( "\t[%d]: (%d, %d)\n", i, aux[i].key, aux[i].count );
-    }
-
-    int s = 0;
-    // O(n)
-    for ( int i = 0; i < returnSize; i++ ) {
-        if ( aux[i].count == max ) {
-            ret[s++] = aux[i].key;
-        }
-    }
-
-    free( aux );
-    return s;
-}
-
-// O(na² + na)
-// O(na²)
 int* findFrequentTreeSum( struct TreeNode* root, int* returnSize ) {
-    int size    = 10000;
-    int* ret    = malloc( sizeof( int ) * size );
-    *returnSize = 0;
+    struct hashmap_t counter;
+    struct darray_t ret;
+    int max = 1;
 
-    sumRecursive( root, &ret, &size, returnSize );
-    *returnSize = getMost( ret, *returnSize );
-    return ret;
+    initDarray( &ret, 10000, sizeof( int ) );
+    initHashmap( &counter, 20, 1000 );
+
+    sumRecursive( root, &counter, &ret, &max );
+    *returnSize = ret.used;
+
+    freeHashmap( &counter );
+    return (int*) ret.data;
 }
