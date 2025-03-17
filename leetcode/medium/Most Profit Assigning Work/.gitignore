@@ -1,0 +1,7 @@
+.vscode
+build
+bin
+graph.png
+faulty.json
+.venv
+__pycache__
